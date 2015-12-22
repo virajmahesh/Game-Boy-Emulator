@@ -1,5 +1,6 @@
 /*
  * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ *
  */
 
 #include "memory.h"
@@ -13,7 +14,7 @@ uint8_t Memory::load_byte(uint16_t addr) {
 }
 
 void Memory::store_byte(uint16_t addr, uint8_t val) {
-  return ram.store_byte(addr, val);
+  ram.store_byte(addr, val);
 }
 
 uint16_t Memory::load_word(uint16_t addr) {
@@ -21,5 +22,5 @@ uint16_t Memory::load_word(uint16_t addr) {
 }
 
 void Memory::store_word(uint16_t addr, uint16_t val) {
-  return ram.store_word(addr, val);
+  ram.store_word(addr, val);
 }

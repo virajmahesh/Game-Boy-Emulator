@@ -4,6 +4,7 @@
  * Interface for the Game Boy's memory. Supports storing and loading data to
  * and from a memory address. Handles memory operations such as ROM bank switching.
  * All memory addresses are 16 bits.
+ *
  */
 
 #ifndef MEMORY_H
