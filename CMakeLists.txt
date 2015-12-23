@@ -5,7 +5,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES src/main/main
                  src/memory/ram
-                 src/memory/memory)
+                 src/memory/memory
+                 src/memory/rom)
 
 add_executable(GameBoyEmulator ${SOURCE_FILES})
 add_subdirectory(test)
