@@ -10,17 +10,17 @@ Memory::Memory() {
 }
 
 uint8_t Memory::load_byte(uint16_t addr) {
-  return ram.load_byte(addr);
+    return ram[addr];
 }
 
 void Memory::store_byte(uint16_t addr, uint8_t val) {
-  ram.store_byte(addr, val);
+    ram[addr] = val;
 }
 
 uint16_t Memory::load_word(uint16_t addr) {
-  return ram.load_word(addr);
+    return *((uint16_t *)(ram + addr));
 }
 
 void Memory::store_word(uint16_t addr, uint16_t val) {
-  ram.store_word(addr, val);
+    *((uint16_t *)(ram + addr)) = val;
 }

@@ -38,10 +38,10 @@ void ROM::store_byte_rom(uint16_t addr, uint8_t val) {
                 if (val == 0) {
                     val = 0x01;
                 }
-                rom_bank = (rom_bank & 0b11100000) | (val & 0b00011111);
+                rom_bank = (rom_bank & 0xE0) | (val & 0x1F);
             }
             if (0x4000 <= addr and addr <= 0x5FFF) {
-                rom_bank = (rom_bank & 0b00011111) | ((val & 0b00000011) << 5);
+                rom_bank = (rom_bank & 0x1F) | ((val & 0x03) << 5);
             }
             break;
 
@@ -57,7 +57,7 @@ void ROM::store_byte_rom(uint16_t addr, uint8_t val) {
         case MBC2:
             if (0x2000 <= addr and addr <= 0x3FFF) {
                 if (val == 0) {
-                    val
+                    val = 0x01;
                 }
             }
     }

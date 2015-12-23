@@ -18,7 +18,7 @@ using namespace testing;
  * Test that the memory module correctly stores and loads a byte to and from
  * a given address.
  */
-TEST(MemoryTest, LoadAndStoreByteWorks) {
+TEST(Memory_Test, Load_And_Store_Byte) {
     Memory memory;
 
     uint8_t data = random_byte();
@@ -35,7 +35,7 @@ TEST(MemoryTest, LoadAndStoreByteWorks) {
  * a given address. Checks that words are stored with the least significant
  * byte first.
  */
-TEST(MemoryTest, LoadAndStoreWordWorks) {
+TEST(Memory_Test, Load_And_Store_Word) {
     Memory memory;
 
     uint16_t data = random_word();
@@ -49,12 +49,4 @@ TEST(MemoryTest, LoadAndStoreWordWorks) {
     // Test that the word was stored correctly by loading both bytes seperately.
     EXPECT_EQ(low_byte(data), memory.load_byte(address));
     EXPECT_EQ(high_byte(data), memory.load_byte(address + 0x0001));
-}
-
-
-int main(int argc, char **argv) {
-    srand(time(NULL)); // Initialize random number generator
-
-    InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

@@ -11,9 +11,6 @@
 #define MEMORY_H
 
 #include <cstdint>
-#include <exception>
-#include <string>
-#include "ram.h"
 
 using namespace std;
 
@@ -21,7 +18,7 @@ class Memory {
 
 private:
 
-    RandomAccessMemory ram;
+    uint8_t ram[0xFFFF + 1];
 
 public:
 
@@ -31,22 +28,22 @@ public:
     Memory();
 
     /**
-     * Read a byte from the given memory address.
+     * Read a byte from memory.
      */
     uint8_t load_byte(uint16_t);
 
     /**
-     * Store a byte at the given memory address.
+     * Store a byte in memory.
      */
     void store_byte(uint16_t, uint8_t);
 
     /**
-     * Read a word (2 bytes) from the given memory address.
+     * Read a word from memory.
      */
     uint16_t load_word(uint16_t);
 
     /**
-     * Store a word (2 bytes) at the given memory address.
+     * Store a word in memory.
      */
     void store_word(uint16_t, uint16_t);
 };
