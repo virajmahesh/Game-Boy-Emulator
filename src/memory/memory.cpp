@@ -18,9 +18,9 @@ void Memory::store_byte(uint16_t addr, uint8_t val) {
 }
 
 uint16_t Memory::load_word(uint16_t addr) {
-    return *((uint16_t *)(ram + addr));
+    return *reinterpret_cast<uint16_t *>(ram + addr);
 }
 
 void Memory::store_word(uint16_t addr, uint16_t val) {
-    *((uint16_t *)(ram + addr)) = val;
+    *reinterpret_cast<uint16_t *>(ram + addr) = val;
 }
