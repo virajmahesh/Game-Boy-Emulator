@@ -2,33 +2,36 @@
  * Author: Viraj Mahesh (virajmahesh@gmail.com)
  */
 
-#include "rom.h"
+#include "cartridge.h"
 
-ROM::ROM(CartridgeType type) : ROM(type, nullptr) {
-
-}
-
-ROM::ROM(CartridgeType type, uint8_t * data) {
+Cartridge::Cartridge(MBCType type, uint8_t * data,
+                     uint32_t rom_size, uint32_t ram_size) {
     rom_bank = 1;
     ram_bank = 0;
     this->type = type;
-    this->data = data;
-}
+    this->rom_data = data;
+    this->rom_size = rom_size;
+    this->ram_size = ram_size;
 
-ROM::~ROM() {
-    if (data != nullptr) {
-        delete data;
+    if (ram_size > 0) {
+        ram_data = new uint8_t[ram_size];
     }
 }
 
-uint8_t ROM::load_byte_rom(uint16_t addr) {
+Cartridge::~Cartridge() {
+    if (rom_data != nullptr) {
+        delete rom_data;
+    }
+}
+
+uint8_t Cartridge::load_byte_rom(uint16_t addr) {
     if (0x4000 <= addr and addr <= 0x7FFF) {
-        return data[(BANK_SIZE * rom_bank) + addr - 0x4000];
+        return rom_data[(BANK_SIZE * rom_bank) + addr - 0x4000];
     }
-    return data[addr];
+    return rom_data[addr];
 }
 
-void ROM::store_byte_rom(uint16_t addr, uint8_t val) {
+void Cartridge::store_byte_rom(uint16_t addr, uint8_t val) {
     switch (type) {
         case ROM_ONLY:
             break;
@@ -82,38 +85,38 @@ void ROM::store_byte_rom(uint16_t addr, uint8_t val) {
     }
 }
 
-uint16_t ROM::load_word_rom(uint16_t addr, uint8_t val) {
+uint16_t Cartridge::load_word_rom(uint16_t addr, uint8_t val) {
     // TODO: Implement me
     return 0;
 }
 
-void ROM::store_word_rom(uint16_t addr, uint16_t val) {
+void Cartridge::store_word_rom(uint16_t addr, uint16_t val) {
     // TODO: Implement me
 }
 
-uint8_t ROM::load_byte_ram(uint16_t addr) {
-    // TODO: Implement me
-    return 0;
-}
-
-void ROM::store_byte_ram(uint16_t addr, uint8_t val) {
-    // TODO: Implement me
-}
-
-uint16_t ROM::load_word_ram(uint16_t addr) {
+uint8_t Cartridge::load_byte_ram(uint16_t addr) {
     // TODO: Implement me
     return 0;
 }
 
-void ROM::store_word_ram(uint16_t addr, uint16_t val) {
+void Cartridge::store_byte_ram(uint16_t addr, uint8_t val) {
     // TODO: Implement me
 }
 
-uint8_t ROM::access_rom_data(uint32_t addr) {
-    return data[addr];
+uint16_t Cartridge::load_word_ram(uint16_t addr) {
+    // TODO: Implement me
+    return 0;
 }
 
-uint16_t ROM::get_rom_bank() {
+void Cartridge::store_word_ram(uint16_t addr, uint16_t val) {
+    // TODO: Implement me
+}
+
+uint8_t Cartridge::access_rom_data(uint32_t addr) {
+    return rom_data[addr];
+}
+
+uint16_t Cartridge::get_rom_bank() {
     return rom_bank;
 }
 

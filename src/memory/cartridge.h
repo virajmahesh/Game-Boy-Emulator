@@ -14,7 +14,7 @@
 
 using namespace std;
 
-enum CartridgeType {
+enum MBCType {
     ROM_ONLY, // 32 KB ROM
     MBC1_16_8, // 16 Mb ROM, 8 KB RAM
     MBC1_4_32, // 4 Mb ROM, 32 KB RAM
@@ -23,42 +23,39 @@ enum CartridgeType {
     MBC5, // 64 Mb ROM, 1 Mb RAM
 };
 
-class ROM {
+class Cartridge {
 
 private:
     // Stores ROM data in memory.
-    uint8_t *data;
+    uint8_t *rom_data;
+    uint8_t *ram_data;
 
     // Size of the ROM in bytes.
-    uint32_t size;
+    uint32_t rom_size;
+    uint32_t ram_size;
 
     // The ROM and RAM bank number.
     uint16_t rom_bank;
     uint16_t ram_bank;
 
     // The type of cartridge. This determines the memory ban controller.
-    CartridgeType type;
+    MBCType type;
 
 public:
     static const uint32_t BANK_SIZE = 0x4000;
     static const uint32_t MAX_BANKS = 128;
     static const uint32_t MAX_SIZE = MAX_BANKS * BANK_SIZE;
 
-    /*
-     * Create a new ROM that has no binary data.
-     */
-    ROM(CartridgeType);
 
     /*
-     * Create a new ROM by passing in a byte array that contains the binary
-     * data. This data will be deleted by the destructor.
+     * Create a new cartridge by passing in a byte array and specifying the RAM size.
      */
-    ROM(CartridgeType, uint8_t *data);
+    Cartridge(MBCType, uint8_t *, uint32_t, uint32_t);
 
     /**
      * Delete ROM data.
      */
-    ~ROM();
+    ~Cartridge();
 
     /*
      * Read a byte from cartridge ROM.

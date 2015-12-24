@@ -4,7 +4,7 @@ project(Game_Boy_Emulator)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES ../src/memory/memory
-                 ../src/memory/rom)
+                 ../src/memory/cartridge)
 
 add_executable(MemoryTest memory/memory_test ${SOURCE_FILES})
 add_executable(ROMTest memory/rom_test ${SOURCE_FILES})
