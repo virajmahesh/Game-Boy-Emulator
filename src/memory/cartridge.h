@@ -6,8 +6,8 @@
  * correct ROM and RAM bank.
  */
 
-#ifndef GAME_BOY_EMULATOR_ROM_H
-#define GAME_BOY_EMULATOR_ROM_H
+#ifndef GAME_BOY_EMULATOR_CARTRIDGE_H
+#define GAME_BOY_EMULATOR_CARTRIDGE_H
 
 
 #include <cstdint>
@@ -42,9 +42,10 @@ private:
     MBCType type;
 
 public:
-    static const uint32_t BANK_SIZE = 0x4000;
+    static const uint32_t ROM_BANK_SIZE = 0x4000;
+    static const uint32_t RAM_BANK_SIZE = 0x2000;
     static const uint32_t MAX_BANKS = 128;
-    static const uint32_t MAX_SIZE = MAX_BANKS * BANK_SIZE;
+    static const uint32_t MAX_SIZE = MAX_BANKS * ROM_BANK_SIZE;
 
 
     /*

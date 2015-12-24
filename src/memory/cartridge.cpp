@@ -26,7 +26,7 @@ Cartridge::~Cartridge() {
 
 uint8_t Cartridge::load_byte_rom(uint16_t addr) {
     if (0x4000 <= addr and addr <= 0x7FFF) {
-        return rom_data[(BANK_SIZE * rom_bank) + addr - 0x4000];
+        return rom_data[(ROM_BANK_SIZE * rom_bank) + addr - 0x4000];
     }
     return rom_data[addr];
 }
@@ -54,6 +54,9 @@ void Cartridge::store_byte_rom(uint16_t addr, uint8_t val) {
                     val = 0x01;
                 }
                 rom_bank = (rom_bank & 0xE0) | (val & 0x1F);
+            }
+            if (0x4000 <= addr and addr <= 0x5000) {
+                ram_bank = val & 0x03;
             }
             break;
 
@@ -95,12 +98,11 @@ void Cartridge::store_word_rom(uint16_t addr, uint16_t val) {
 }
 
 uint8_t Cartridge::load_byte_ram(uint16_t addr) {
-    // TODO: Implement me
-    return 0;
+    return ram_data[RAM_BANK_SIZE * ram_bank + addr - 0xA000];
 }
 
 void Cartridge::store_byte_ram(uint16_t addr, uint8_t val) {
-    // TODO: Implement me
+    ram_data[RAM_BANK_SIZE * ram_bank + addr - 0xA000] = val;
 }
 
 uint16_t Cartridge::load_word_ram(uint16_t addr) {
