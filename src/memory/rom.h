@@ -33,8 +33,8 @@ private:
     uint32_t size;
 
     // The ROM and RAM bank number.
-    uint8_t rom_bank;
-    uint8_t ram_bank;
+    uint16_t rom_bank;
+    uint16_t ram_bank;
 
     // The type of cartridge. This determines the memory ban controller.
     CartridgeType type;
