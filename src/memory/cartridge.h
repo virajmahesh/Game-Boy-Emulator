@@ -106,9 +106,19 @@ public:
     uint8_t access_rom_data(uint32_t);
 
     /*
+     * Directly access a byte from RAM data. Useful for testing.
+     */
+    uint8_t access_ram_data(uint32_t);
+
+    /*
      * Get the current rom bank that is active.
      */
     uint16_t get_rom_bank();
+
+    /*
+     * Get the current ram bank that is active
+     */
+    uint16_t get_ram_bank();
 };
 
 

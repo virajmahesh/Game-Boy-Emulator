@@ -29,6 +29,10 @@ inline uint32_t rom_addr(uint16_t bank, uint16_t addr) {
     return Cartridge::ROM_BANK_SIZE * bank + addr - 0x4000;
 }
 
+inline uint32_t ram_addr(uint8_t bank, uint32_t addr) {
+    return Cartridge::RAM_BANK_SIZE * bank + addr - 0xA000;
+}
+
 /*
  * Test that Bank 0 is accessible in cartridges with an MBC 1
  * controller in 16/8 mode.
@@ -98,27 +102,40 @@ TEST(MBC5_ROM_Test, Load_Byte_From_ROM_Bank_0) {
  */
 TEST(MBC1_16_8_ROM_TEST, Bank_Switching) {
     uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 128;
-    Cartridge rom = Cartridge(MBC1_16_8, random_byte_array(rom_size), rom_size, 0);
+    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 1;
+    Cartridge cart = Cartridge(MBC1_16_8, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint8_t j = 0x00; j <= 0x03; j++) {
         for (uint8_t i = 0x01; i <= 0x1F; i++) {
             // Switch to another bank
-            rom.store_byte_rom(random_word(0x2000, 0x4000), i);
-            rom.store_byte_rom(random_word(0x4000, 0x6000), j);
+            cart.store_byte_rom(random_word(0x2000, 0x4000), i);
+            cart.store_byte_rom(random_word(0x4000, 0x6000), j);
 
             uint16_t bank = rom_bank_mbc_1(i, j);
             uint16_t addr = random_word(0x4000, 0x8000);
-            uint8_t data = rom.access_rom_data(rom_addr(bank, addr));
+            uint8_t data = cart.access_rom_data(rom_addr(bank, addr));
 
-            EXPECT_EQ(data, rom.load_byte_rom(addr));
-            EXPECT_EQ(bank, rom.get_rom_bank());
+            EXPECT_EQ(data, cart.load_byte_rom(addr));
+            EXPECT_EQ(bank, cart.get_rom_bank());
 
-            EXPECT_NE(0x00, rom.get_rom_bank());
-            EXPECT_NE(0x20, rom.get_rom_bank());
-            EXPECT_NE(0x40, rom.get_rom_bank());
-            EXPECT_NE(0x60, rom.get_rom_bank());
+            EXPECT_NE(0x00, cart.get_rom_bank());
+            EXPECT_NE(0x20, cart.get_rom_bank());
+            EXPECT_NE(0x40, cart.get_rom_bank());
+            EXPECT_NE(0x60, cart.get_rom_bank());
         }
     }
+
+    // Switch to another RAM bank
+    cart.store_byte_rom(random_word(0x4000, 0x6000), 0);
+
+    uint8_t data = random_byte();
+    uint16_t addr = random_word(0xA000, 0xC000);
+
+    cart.store_byte_ram(addr, data);
+
+    EXPECT_EQ(0, cart.get_ram_bank());
+    EXPECT_EQ(data, cart.load_byte_ram(addr));
+    EXPECT_EQ(data, cart.access_ram_data(ram_addr(0, addr)));
 }
 
 /*
@@ -128,20 +145,35 @@ TEST(MBC1_16_8_ROM_TEST, Bank_Switching) {
  */
 TEST(MBC1_4_32_ROM_TEST, Bank_Switching) {
     uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 32;
-    Cartridge rom = Cartridge(MBC1_4_32, random_byte_array(rom_size), rom_size, 0);
+    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 4;
+    Cartridge cart = Cartridge(MBC1_4_32, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint8_t i = 0x00; i <= 0x01F; i++) {
-        // Switch to another bank
-        rom.store_byte_rom(random_word(0x2000, 0x4000), i);
+        // Switch to another ROM bank
+        cart.store_byte_rom(random_word(0x2000, 0x4000), i);
 
         uint16_t bank = rom_bank_mbc_1(i, 0);
         uint16_t addr = random_word(0x4000, 0x8000);
-        uint8_t data = rom.access_rom_data(rom_addr(bank, addr));
+        uint8_t data = cart.access_rom_data(rom_addr(bank, addr));
 
-        EXPECT_EQ(data, rom.load_byte_rom(addr));
-        EXPECT_EQ(bank, rom.get_rom_bank());
+        EXPECT_EQ(data, cart.load_byte_rom(addr));
+        EXPECT_EQ(bank, cart.get_rom_bank());
 
-        EXPECT_NE(0x00, rom.get_rom_bank());
+        EXPECT_NE(0x00, cart.get_rom_bank());
+    }
+
+    for (uint8_t i = 0x00; i <= 0x03; i++) {
+        // Switch to another RAM bank
+        cart.store_byte_rom(random_word(0x4000, 0x6000), i);
+
+        uint8_t data = random_byte();
+        uint16_t addr = random_word(0xA000, 0xC000);
+
+        cart.store_byte_ram(addr, data);
+
+        EXPECT_EQ(i, cart.get_ram_bank());
+        EXPECT_EQ(data, cart.load_byte_ram(addr));
+        EXPECT_EQ(data, cart.access_ram_data(ram_addr(i, addr)));
     }
 }
 

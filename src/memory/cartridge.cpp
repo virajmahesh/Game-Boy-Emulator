@@ -16,6 +16,9 @@ Cartridge::Cartridge(MBCType type, uint8_t * data,
     if (ram_size > 0) {
         ram_data = new uint8_t[ram_size];
     }
+    else {
+        ram_data = nullptr;
+    }
 }
 
 Cartridge::~Cartridge() {
@@ -55,7 +58,7 @@ void Cartridge::store_byte_rom(uint16_t addr, uint8_t val) {
                 }
                 rom_bank = (rom_bank & 0xE0) | (val & 0x1F);
             }
-            if (0x4000 <= addr and addr <= 0x5000) {
+            if (0x4000 <= addr and addr <= 0x5FFF) {
                 ram_bank = val & 0x03;
             }
             break;
@@ -118,8 +121,16 @@ uint8_t Cartridge::access_rom_data(uint32_t addr) {
     return rom_data[addr];
 }
 
+uint8_t Cartridge::access_ram_data(uint32_t addr) {
+    return ram_data[addr];
+}
+
 uint16_t Cartridge::get_rom_bank() {
     return rom_bank;
+}
+
+uint16_t Cartridge::get_ram_bank() {
+    return ram_bank;
 }
 
 
