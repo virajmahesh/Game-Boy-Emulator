@@ -24,7 +24,6 @@ enum MBCType {
 };
 
 class Cartridge {
-
 private:
     // Stores ROM data in memory.
     uint8_t *rom_data;
@@ -47,6 +46,7 @@ public:
     static const uint32_t MAX_BANKS = 128;
     static const uint32_t MAX_SIZE = MAX_BANKS * ROM_BANK_SIZE;
 
+    Cartridge();
 
     /*
      * Create a new cartridge by passing in a byte array and specifying the RAM size.
@@ -56,49 +56,49 @@ public:
     /**
      * Destroy a cartridge. Frees up all memory allocated by the constructor.
      */
-    ~Cartridge();
+    virtual ~Cartridge();
 
     /*
      * Read a byte from cartridge ROM.
      */
-    uint8_t load_byte_rom(uint16_t);
+    virtual uint8_t load_byte_rom(uint16_t);
 
     /*
      * Store a byte in cartridge ROM.
      * This method should be used for bank switching.
      */
-    void store_byte_rom(uint16_t, uint8_t);
+    virtual void store_byte_rom(uint16_t, uint8_t);
 
     /**
      * Read a word from ROM.
      */
-    uint16_t load_word_rom(uint16_t, uint8_t);
+    virtual uint16_t load_word_rom(uint16_t);
 
     /*
      * Store a word in cartridge ROM.
      * This method should be used for bank switching.
      */
-    void store_word_rom(uint16_t, uint16_t);
+    virtual void store_word_rom(uint16_t, uint16_t);
 
     /*
      * Read a byte from cartridge RAM.
      */
-    uint8_t load_byte_ram(uint16_t);
+    virtual uint8_t load_byte_ram(uint16_t);
 
     /*
      * Store a byte in cartridge RAM.
      */
-    void store_byte_ram(uint16_t, uint8_t);
+    virtual void store_byte_ram(uint16_t, uint8_t);
 
     /*
      * Read a word from cartridge RAM.
      */
-    uint16_t load_word_ram(uint16_t);
+    virtual uint16_t load_word_ram(uint16_t);
 
     /*
      * Store a word in cartridge RAM.
      */
-    void store_word_ram(uint16_t, uint16_t);
+    virtual void store_word_ram(uint16_t, uint16_t);
 
     /*
      * Directly access a byte from ROM data. Useful for testing.

@@ -11,6 +11,7 @@
 #define MEMORY_H
 
 #include <cstdint>
+#include "cartridge.h"
 
 using namespace std;
 
@@ -18,7 +19,11 @@ class Memory {
 
 private:
 
+    // Internal RAM
     uint8_t ram[0xFFFF + 1];
+
+    // The Game boy cartridge we are currently playing
+    Cartridge *cart;
 
 public:
 
@@ -26,6 +31,8 @@ public:
      * Initialize a new Memory object.
      */
     Memory();
+
+    Memory(Cartridge *cart);
 
     /**
      * Read a byte from memory.

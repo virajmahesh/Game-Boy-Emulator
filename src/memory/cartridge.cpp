@@ -4,6 +4,9 @@
 
 #include "cartridge.h"
 
+Cartridge::Cartridge() : Cartridge(ROM_ONLY, nullptr, 0, 0) {
+
+}
 Cartridge::Cartridge(MBCType type, uint8_t * data,
                      uint32_t rom_size, uint32_t ram_size) {
     rom_bank = 1;
@@ -97,7 +100,7 @@ void Cartridge::store_byte_rom(uint16_t addr, uint8_t val) {
     }
 }
 
-uint16_t Cartridge::load_word_rom(uint16_t addr, uint8_t val) {
+uint16_t Cartridge::load_word_rom(uint16_t addr) {
     // TODO: Implement me
     return 0;
 }

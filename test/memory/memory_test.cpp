@@ -5,24 +5,41 @@
  */
 
 #include <cstdlib>
+#include <cstdint>
 #include <ctime>
+
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
-
-#include "../../src/memory/memory.h"
 #include "../test_util.h"
+#include "../../src/memory/memory.h"
 
 using namespace testing;
+
+class MockCartridge: public Cartridge {
+public:
+    MOCK_METHOD1(load_byte_rom, uint8_t(uint16_t));
+    MOCK_METHOD2(store_byte_rom, void(uint16_t, uint8_t));
+
+    MOCK_METHOD1(load_word_rom, uint16_t(uint16_t));
+    MOCK_METHOD2(store_word_rom, void(uint16_t, uint16_t));
+
+    MOCK_METHOD1(load_byte_ram, uint8_t(uint16_t));
+    MOCK_METHOD2(store_byte_ram, void(uint16_t, uint8_t));
+
+    MOCK_METHOD1(load_word_ram, uint16_t(uint16_t));
+    MOCK_METHOD2(store_word_ram, void(uint16_t, uint16_t));
+};
 
 /*
  * Test that the memory module correctly stores and loads a byte to and from
  * a given address.
  */
-TEST(Memory_Test, Load_And_Store_Byte) {
+TEST(Memory_Test, Load_And_Store_Byte_RAM) {
     Memory memory;
 
     uint8_t data = random_byte();
-    uint16_t address = random_word();
+    uint16_t address = random_word(0xC000, 0xCFFF);
 
     memory.store_byte(address, data);
 
@@ -35,11 +52,11 @@ TEST(Memory_Test, Load_And_Store_Byte) {
  * a given address. Checks that words are stored with the least significant
  * byte first.
  */
-TEST(Memory_Test, Load_And_Store_Word) {
+TEST(Memory_Test, Load_And_Store_Word_RAM) {
     Memory memory;
 
     uint16_t data = random_word();
-    uint16_t address = random_word();
+    uint16_t address = random_word(0xC000, 0xCFFF);
 
     memory.store_word(address, data);
 
@@ -49,4 +66,69 @@ TEST(Memory_Test, Load_And_Store_Word) {
     // Test that the word was stored correctly by loading both bytes seperately.
     EXPECT_EQ(low_byte(data), memory.load_byte(address));
     EXPECT_EQ(high_byte(data), memory.load_byte(address + 0x0001));
+}
+
+/*
+ * Test that the address space is correctly partioned and that calls to
+ * load are correctly delegated.
+ */
+TEST(Memory_Test, Address_Space_Partitioning_Load_Ops) {
+    StrictMock<MockCartridge> mock_cartridge;
+
+    Memory memory = Memory(&mock_cartridge);
+
+    uint16_t rom_addr = random_word(0x0000, 0x8000);
+    uint16_t ram_addr = random_word(0xA000, 0xBFFF);
+
+    EXPECT_CALL(mock_cartridge, load_byte_rom(rom_addr))
+            .Times(1)
+            .WillOnce(Return(0xFF));
+
+    EXPECT_CALL(mock_cartridge, load_byte_ram(ram_addr))
+            .Times(1)
+            .WillOnce(Return(0xEE));
+
+    EXPECT_CALL(mock_cartridge, load_word_rom(rom_addr))
+            .Times(1)
+            .WillOnce(Return(0xFFEE));
+
+    EXPECT_CALL(mock_cartridge, load_word_ram(ram_addr))
+            .Times(1)
+            .WillOnce(Return(0xEEFF));
+
+    EXPECT_EQ(0xFF, memory.load_byte(rom_addr));
+    EXPECT_EQ(0xEE, memory.load_byte(ram_addr));
+    EXPECT_EQ(0xFFEE, memory.load_word(rom_addr));
+    EXPECT_EQ(0xEEFF, memory.load_word(ram_addr));
+}
+
+/*
+ * Test that the address space is correctly partioned and that calls to
+ * store are correctly delegated.
+ */
+TEST(Memory_Test, Address_Space_Partitioning_Store_Ops) {
+    StrictMock<MockCartridge> mock_cartridge;
+
+    Memory memory = Memory(&mock_cartridge);
+
+    uint16_t rom_addr = random_word(0x0000, 0x8000);
+    uint16_t ram_addr = random_word(0xA000, 0xBFFF);
+
+    EXPECT_CALL(mock_cartridge, store_byte_rom(rom_addr, 0x12)).Times(1);
+    EXPECT_CALL(mock_cartridge, store_byte_ram(ram_addr, 0x34)).Times(1);
+
+    EXPECT_CALL(mock_cartridge, store_word_rom(rom_addr, 0x1234)).Times(1);
+    EXPECT_CALL(mock_cartridge, store_word_ram(ram_addr, 0x5678)).Times(1);
+
+    memory.store_byte(rom_addr, 0x12);
+    memory.store_byte(ram_addr, 0x34);
+    memory.store_word(rom_addr, 0x1234);
+    memory.store_word(ram_addr, 0x5678);
+}
+
+int main(int argc, char **argv) {
+    srand(time(NULL));
+    InitGoogleTest(&argc, argv);
+
+    return RUN_ALL_TESTS();
 }

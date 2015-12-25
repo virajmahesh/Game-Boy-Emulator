@@ -10,9 +10,8 @@ add_executable(MemoryTest memory/memory_test ${SOURCE_FILES})
 add_executable(CartridgeTest memory/cartridge_test ${SOURCE_FILES})
 
 target_link_libraries(MemoryTest /usr/local/lib/libgtest.a)
-target_link_libraries(MemoryTest /usr/local/lib/libgtest_main.a)
+target_link_libraries(MemoryTest /usr/local/lib/libgmock.a)
 
 target_link_libraries(CartridgeTest /usr/local/lib/libgtest.a)
-target_link_libraries(CartridgeTest /usr/local/lib/libgtest_main.a)
 
 set(EXECUTABLE_OUTPUT_PATH ../bin/tests)

@@ -9,6 +9,8 @@
 #include "../test_util.h"
 #include "../../src/memory/cartridge.h"
 
+using namespace testing;
+
 inline uint16_t rom_bank_mbc_1(uint8_t i, uint8_t j) {
     return ((j & 0x03) <<  5) | (((i == 0)? 1 : i) & 0x1F);
 }
@@ -284,4 +286,11 @@ TEST(MBC5_ROM_TEST, Bank_Switching) {
         EXPECT_EQ(data, cart.load_byte_ram(addr));
         EXPECT_EQ(data, cart.access_ram_data(ram_addr(i, addr)));
     }
+}
+
+int main(int argc, char **argv) {
+    srand(time(NULL));
+    InitGoogleTest(&argc, argv);
+
+    return RUN_ALL_TESTS();
 }
