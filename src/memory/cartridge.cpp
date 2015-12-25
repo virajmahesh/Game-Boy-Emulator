@@ -22,8 +22,8 @@ Cartridge::Cartridge(MBCType type, uint8_t * data,
 }
 
 Cartridge::~Cartridge() {
-    if (rom_data != nullptr) {
-        delete rom_data;
+    if (ram_data != nullptr) {
+        delete ram_data;
     }
 }
 
@@ -59,7 +59,7 @@ void Cartridge::store_byte_rom(uint16_t addr, uint8_t val) {
                 rom_bank = (rom_bank & 0xE0) | (val & 0x1F);
             }
             if (0x4000 <= addr and addr <= 0x5FFF) {
-                ram_bank = val & 0x03;
+                ram_bank = val & 0x0F;
             }
             break;
 
@@ -79,6 +79,9 @@ void Cartridge::store_byte_rom(uint16_t addr, uint8_t val) {
                 }
                 rom_bank = (val & 0x7F);
             }
+            if (0x4000 <= addr and addr <= 0x5FFF) {
+                ram_bank = val & 0x0F;
+            }
             break;
 
         case MBC5:
@@ -87,6 +90,9 @@ void Cartridge::store_byte_rom(uint16_t addr, uint8_t val) {
             }
             if (0x3000 <= addr and addr <= 0x3FFF) {
                 rom_bank = (rom_bank & 0x00FF) | (((uint16_t)(val & 0x01)) << 8);
+            }
+            if (0x4000 <= addr and addr <= 0x5FFF) {
+                ram_bank = val & 0x0F;
             }
     }
 }
@@ -105,7 +111,12 @@ uint8_t Cartridge::load_byte_ram(uint16_t addr) {
 }
 
 void Cartridge::store_byte_ram(uint16_t addr, uint8_t val) {
-    ram_data[RAM_BANK_SIZE * ram_bank + addr - 0xA000] = val;
+    if (type == MBC2) {
+        ram_data[RAM_BANK_SIZE * ram_bank + addr - 0xA000] = val & 0x0F;
+    }
+    else {
+        ram_data[RAM_BANK_SIZE * ram_bank + addr - 0xA000] = val;
+    }
 }
 
 uint16_t Cartridge::load_word_ram(uint16_t addr) {

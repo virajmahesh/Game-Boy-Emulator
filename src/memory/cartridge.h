@@ -54,7 +54,7 @@ public:
     Cartridge(MBCType, uint8_t *, uint32_t, uint32_t);
 
     /**
-     * Delete ROM data.
+     * Destroy a cartridge. Frees up all memory allocated by the constructor.
      */
     ~Cartridge();
 

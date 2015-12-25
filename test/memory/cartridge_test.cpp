@@ -183,7 +183,9 @@ TEST(MBC1_4_32_ROM_TEST, Bank_Switching) {
  */
 TEST(MBC2_ROM_TEST, Bank_Switching) {
     uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 16;
-    Cartridge rom = Cartridge(MBC2, random_byte_array(rom_size), rom_size, 0);
+    uint16_t ram_size = 0x200;
+
+    Cartridge rom = Cartridge(MBC2, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint8_t i = 0x00; i <= 0x0F; i++) {
         // Switch to another bank
@@ -198,6 +200,13 @@ TEST(MBC2_ROM_TEST, Bank_Switching) {
 
         EXPECT_NE(0x00, rom.get_rom_bank());
     }
+
+    uint8_t data = random_byte();
+    uint16_t addr = random_word(0xA000, 0xA200);
+
+    rom.store_byte_ram(addr, data);
+
+    EXPECT_EQ(data & 0x0F, rom.load_byte_ram(addr));
 }
 
 /*
@@ -206,20 +215,35 @@ TEST(MBC2_ROM_TEST, Bank_Switching) {
  */
 TEST(MBC3_ROM_TEST, Bank_Switching) {
     uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 128;
-    Cartridge rom = Cartridge(MBC3, random_byte_array(rom_size), rom_size, 0);
+    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 4;
+    Cartridge cart = Cartridge(MBC3, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint8_t i = 0x00; i <= 0x7F; i++) {
         // Switch to another bank
-        rom.store_byte_rom(random_word(0x2000, 0x4000), i);
+        cart.store_byte_rom(random_word(0x2000, 0x4000), i);
 
         uint16_t bank = rom_bank_mbc_3(i);
         uint16_t addr = random_word(0x4000, 0x8000);
-        uint8_t data = rom.access_rom_data(rom_addr(bank, addr));
+        uint8_t data = cart.access_rom_data(rom_addr(bank, addr));
 
-        EXPECT_EQ(data, rom.load_byte_rom(addr));
-        EXPECT_EQ(bank, rom.get_rom_bank());
+        EXPECT_EQ(data, cart.load_byte_rom(addr));
+        EXPECT_EQ(bank, cart.get_rom_bank());
 
-        EXPECT_NE(0x00, rom.get_rom_bank());
+        EXPECT_NE(0x00, cart.get_rom_bank());
+    }
+
+    for (uint8_t i = 0x00; i <= 0x03; i++) {
+        // Switch to another RAM bank
+        cart.store_byte_rom(random_word(0x4000, 0x6000), i);
+
+        uint8_t data = random_byte();
+        uint16_t addr = random_word(0xA000, 0xC000);
+
+        cart.store_byte_ram(addr, data);
+
+        EXPECT_EQ(i, cart.get_ram_bank());
+        EXPECT_EQ(data, cart.load_byte_ram(addr));
+        EXPECT_EQ(data, cart.access_ram_data(ram_addr(i, addr)));
     }
 }
 
@@ -229,20 +253,35 @@ TEST(MBC3_ROM_TEST, Bank_Switching) {
  */
 TEST(MBC5_ROM_TEST, Bank_Switching) {
     uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 512;
-    Cartridge rom = Cartridge(MBC5, random_byte_array(rom_size), rom_size, 0);
+    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 16;
+    Cartridge cart = Cartridge(MBC5, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint16_t j = 0x00; j <= 0x01; j++) {
         for (uint16_t i = 0x00; i <= 0xFF; i++) {
             // Switch to another bank
-            rom.store_byte_rom(random_word(0x2000, 0x2FFF), i);
-            rom.store_byte_rom(random_word(0x3000, 0x3FFF), j);
+            cart.store_byte_rom(random_word(0x2000, 0x2FFF), i);
+            cart.store_byte_rom(random_word(0x3000, 0x3FFF), j);
 
             uint16_t bank = rom_bank_mbc_5(i, j);
             uint16_t addr = random_word(0x4000, 0x8000);
-            uint8_t data = rom.access_rom_data(rom_addr(bank, addr));
+            uint8_t data = cart.access_rom_data(rom_addr(bank, addr));
 
-            EXPECT_EQ(data, rom.load_byte_rom(addr));
-            EXPECT_EQ(bank, rom.get_rom_bank());
+            EXPECT_EQ(data, cart.load_byte_rom(addr));
+            EXPECT_EQ(bank, cart.get_rom_bank());
         }
+    }
+
+    for (uint8_t i = 0x00; i <= 0xF; i++) {
+        // Switch to another RAM bank
+        cart.store_byte_rom(random_word(0x4000, 0x6000), i);
+
+        uint8_t data = random_byte();
+        uint16_t addr = random_word(0xA000, 0xC000);
+
+        cart.store_byte_ram(addr, data);
+
+        EXPECT_EQ(i, cart.get_ram_bank());
+        EXPECT_EQ(data, cart.load_byte_ram(addr));
+        EXPECT_EQ(data, cart.access_ram_data(ram_addr(i, addr)));
     }
 }
