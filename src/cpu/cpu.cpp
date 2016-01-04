@@ -86,7 +86,7 @@ uint8_t & CPU::r(uint8_t n) {
 }
 
 inline void CPU::alu(uint8_t op, uint8_t val) {
-    uint8_t old_A = A;
+    uint8_t old_C = C_;
     switch (op) {
         case 0:
             // ADD A, val
@@ -98,9 +98,9 @@ inline void CPU::alu(uint8_t op, uint8_t val) {
         case 1:
             // ADC A, val
             N_ = 0;
-            H_ = half_carry_8(A, val + C_);
-            A += val + C_;
-            C_ = carry_8(old_A, val + C_);
+            H_ = half_carry_8(A, val) or half_carry_8(A + val, C_);
+            C_ = carry_8(A, val) or carry_8(A + val, C_);
+            A += val + old_C;
             break;
         case 2:
             // SUB A, val
@@ -112,9 +112,9 @@ inline void CPU::alu(uint8_t op, uint8_t val) {
         case 3:
             // SUBC A, val
             N_ = 1;
-            H_ = half_borrow_8(A, val + C_);
-            C_ = borrow_8(A, val + C_);
-            A -= (val + C_);
+            H_ = half_borrow_8(A, val) or half_borrow_8(A - val, C_);
+            C_ = borrow_8(A, val) or borrow_8(A - val, C_);
+            A -= (val + old_C);
             break;
         case 4:
             // AND A, val
@@ -708,10 +708,7 @@ string CPU::to_string() {
 
     // Print the opcode.
     out << "Op: " << setfill('0') << setw(2) << hex << uppercase << opcode;
-    if (opcode == 0xCB) {
-        // If the opcode is CB prefixed, then print the next opcode as well.
-        out << setfill('0') << setw(2) << hex << uppercase << next_opcode;
-    }
+    out << " " << setfill('0') << setw(2) << hex << uppercase << next_opcode;
 
     // Print the CPU registers.
     out << ", PC: " << setfill('0') << setw(4) << hex << uppercase << PC;
