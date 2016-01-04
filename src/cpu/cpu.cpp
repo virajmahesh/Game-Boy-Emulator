@@ -188,7 +188,7 @@ inline void CPU::rot(uint8_t op, uint8_t i) {
             N_ = 0;
             H_ = 0;
             C_ = (r(i) & 0x80) >> 7;
-            r(i) = (r(i) << 1) | (r(i) & 0x01);
+            r(i) = (r(i) << 1) & 0xFE;
             break;
         case 5:
             // SRA r[i]
@@ -218,7 +218,7 @@ inline void CPU::rot(uint8_t op, uint8_t i) {
 inline void CPU::bit(uint8_t b, uint8_t z) {
     H_ = 1;
     N_ = 0;
-    Z_ = (r(z) & (0x01 << b)) >> b;
+    Z_ = !((r(z) & (0x01 << b)) >> b);
 }
 
 inline void CPU::res(uint8_t y, uint8_t z) {
@@ -490,8 +490,8 @@ void CPU::execute_next_instr() {
             else if (y == 5) {
                 // CPL
                 A = ~A;
-                N_ = 0;
-                H_ = 0;
+                N_ = 1;
+                H_ = 1;
                 PC += 1;
             }
             else if (y == 6) {
@@ -502,7 +502,8 @@ void CPU::execute_next_instr() {
                 PC += 1;
             }
             else if (y == 7) {
-                C_ = !C;
+                // CCF
+                C_ = !C_;
                 N_ = 0;
                 H_ = 0;
                 PC += 1;
@@ -610,11 +611,21 @@ void CPU::execute_next_instr() {
                 memory->store_byte(nn, A);
                 PC += 3;
             }
+            else if (instr == 0xE2) {
+                // LD (C), A
+                memory->store_byte(0xFF00 + C, A);
+                PC += 1;
+            }
             else if (instr == 0xFA) {
                 // LD A, (nn)
                 uint16_t nn = memory->load_word(PC + 1);
                 A = memory->load_byte(nn);
                 PC += 3;
+            }
+            else if (instr == 0xF2) {
+                // LD A, (C)
+                A = memory->load_byte(0xFF00 + C);
+                PC += 1;
             }
             else {
                 // NOP
@@ -682,7 +693,7 @@ void CPU::execute_next_instr() {
         else if (z == 7) {
             // RST y*8
             SP -= 2;
-            memory->store_word(SP, PC + 3);
+            memory->store_word(SP, PC + 1);
             PC = y * 8;
         }
     }
