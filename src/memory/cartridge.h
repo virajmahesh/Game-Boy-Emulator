@@ -40,6 +40,10 @@ private:
     // The type of cartridge. This determines the memory ban controller.
     MBCType type;
 
+    static const uint32_t ROM_TYPE_ADDR = 0x0147;
+    static const uint32_t ROM_SIZE_ADDR = 0x0148;
+    static const uint32_t RAM_SIZE_ADDR = 0x0149;
+
 public:
     static const uint32_t ROM_BANK_SIZE = 0x4000;
     static const uint32_t RAM_BANK_SIZE = 0x2000;
@@ -47,6 +51,12 @@ public:
     static const uint32_t MAX_SIZE = MAX_BANKS * ROM_BANK_SIZE;
 
     Cartridge();
+
+    /*
+     * Create a new cartridge by passing in a byte array. This constructor will parse
+     * size information and MBC type from the rom file.
+     */
+    Cartridge(uint8_t *);
 
     /*
      * Create a new cartridge by passing in a byte array and specifying the RAM size.
@@ -99,6 +109,16 @@ public:
      * Store a word in cartridge RAM.
      */
     virtual void store_word_ram(uint16_t, uint16_t);
+
+    /*
+     * Get a reference to a byte of data store in ROM.
+     */
+    uint8_t & get_byte_reference_rom(uint16_t);
+
+    /*
+     * Get reference to a byte of data stored in RAM.
+     */
+    uint8_t & get_byte_reference_ram(uint16_t);
 
     /*
      * Directly access a byte from ROM data. Useful for testing.
