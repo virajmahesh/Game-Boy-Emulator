@@ -1,5 +1,9 @@
 /*
  * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ *
+ * Interface for the Game Boy's CPU. Fetches an instruction from memory and
+ * executes it. At the end of the fetch-execute cycle, the CPU updates registers
+ * and handles interrupts if required.
  */
 
 #ifndef GAME_BOY_EMULATOR_CPU_H
@@ -20,12 +24,16 @@ typedef uint8_t register8_t;
 class CPU {
 
 private:
-    // The number of instructions executed
-    uint64_t instructions;
+    static const uint64_t CYCLES_PER_SEC = 4194304;
 
-    Memory *memory;
+    bool ime_flag; // Master interrupt flag.
+    bool halted; // CPU is halted (i.e timer is stopped).
 
-    bool ime_flag;
+    uint64_t num_instructions; // The number of instructions executed.
+    uint64_t timer_cycles; // Number of cycles since TIMA register was updated.
+    uint64_t div_cycles; // Number of cycles since the DIV register was last updated.
+
+    Memory *memory; // The Memory that the CPU reads and writes to.
 
     uint8_t cc(uint8_t);
     uint8_t & r(uint8_t);
@@ -37,6 +45,10 @@ private:
     void bit(uint8_t, uint8_t);
     void res(uint8_t, uint8_t);
     void set(uint8_t, uint8_t);
+
+    void update_timer(uint32_t);
+
+    uint32_t fetch_execute_instruction();
 
 public:
     union {
@@ -94,7 +106,7 @@ public:
     /*
      * @return: The number of instructions executed by the CPU.
      */
-    uint64_t get_instructions();
+    uint64_t get_num_instructions();
 
     /*
      * Check interrupts and handle them.

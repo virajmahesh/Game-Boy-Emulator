@@ -5,13 +5,22 @@
 #include "cpu.h"
 
 CPU::CPU(Memory *memory) {
+    // Initialize registers
     AF = 0x11B0;
     BC = 0x0013;
     DE = 0x00D8;
     HL = 0x014D;
     SP = 0xFFFE;
     PC = 0x0100;
+
+    // Initialize cycle counters
+    div_cycles = 0;
+    timer_cycles = 0;
+
+    // Initialize CPU state flags
+    halted = false;
     ime_flag = false;
+
     this->memory = memory;
 }
 
@@ -284,12 +293,64 @@ inline void CPU::set(uint8_t y, uint8_t z) {
 }
 
 void CPU::execute_next_instr() {
+    uint32_t cycles = 0;
+    if (!halted) {
+        cycles = fetch_execute_instruction();
+    }
+    else {
+        // NOPs
+        cycles += 4;
+    }
+
+    // Update LCD
+    // TODO: Implement this
+
+    // Update Timer
+    update_timer(cycles);
+
+    // Update Serial
+    // TODO: Implement this
+
+    // Handle the interrupts
+    handle_interrupts();
+ }
+
+string CPU::to_string() {
+    ostringstream out;
+
+    uint16_t opcode = memory->load_byte(PC);
+    uint16_t next_opcode = memory->load_byte(PC + 1);
+
+    // Print the number of instructions executed so far
+    out << num_instructions + 1 << ", ";
+
+    // Print the opcode.
+    out << "Op: " << setfill('0') << setw(2) << hex << uppercase << opcode;
+    out << " " << setfill('0') << setw(2) << hex << uppercase << next_opcode;
+
+    // Print the CPU registers.
+    out << ", PC: " << setfill('0') << setw(4) << hex << uppercase << PC;
+    out << ", AF: " << setfill('0') << setw(4) << hex << uppercase << AF;
+    out << ", BC: " << setfill('0') << setw(4) << hex << uppercase << BC;
+    out << ", DE: " << setfill('0') << setw(4) << hex << uppercase << DE;
+    out << ", HL: " << setfill('0') << setw(4) << hex << uppercase << HL;
+    out << ", SP: " << setfill('0') << setw(4) << hex << uppercase << SP;
+    out << ", H: " << halted;
+    out << ", I: " << ime_flag;
+    out << ", IF: " << (uint16_t)memory->load_byte(IF);
+
+    return out.str();
+}
+
+inline uint32_t CPU::fetch_execute_instruction() {
     uint8_t instr = memory->load_byte(PC);
     uint8_t x = instr >> 6;
     uint8_t y = (instr & 0x38) >> 3;
     uint8_t z = instr & 0x07;
     uint8_t p = y >> 1;
     uint8_t q = y % 2;
+
+    uint32_t cycles = 0;
 
     if (instr == 0xCB) {
         // CB Prefixed instructions
@@ -313,34 +374,48 @@ void CPU::execute_next_instr() {
             set(y, z);
             PC += 2;
         }
+        cycles += 8;
+        if ((instr & 0x0F) == 0x06) {
+            cycles += 8;
+        }
+        else if ((instr & 0x0F) == 0x0E) {
+            cycles += 8;
+        }
     }
     else if (x == 0) {
         if (z == 0) {
             if (y == 0) {
                 // NOP
                 PC += 1;
+                cycles += 4;
             }
             else if (y == 1) {
                 // LD (nn) SP
                 uint16_t nn = memory->load_word(PC + 1);
                 memory->store_word(nn, SP);
                 PC += 3;
+                cycles += 20;
             }
             else if (y == 2) {
                 // STOP
                 PC += 2;
+                cycles += 4;
             }
             else if (y == 3) {
                 // JR d
                 JR_d();
+                cycles += 12;
+
             }
             else {
                 // JR cc[y - 4], d
                 if (cc(y - 4)) {
                     JR_d();
+                    cycles += 12;
                 }
                 else {
                     PC += 2;
+                    cycles += 8;
                 }
             }
         }
@@ -350,6 +425,7 @@ void CPU::execute_next_instr() {
                 uint16_t nn = memory->load_word(PC + 1);
                 rp(p) = nn;
                 PC += 3;
+                cycles += 12;
             }
             else if (q == 1) {
                 // ADD HL, RP
@@ -358,6 +434,7 @@ void CPU::execute_next_instr() {
                 C_ = carry_16(HL, rp(p));
                 HL += rp(p);
                 PC += 1;
+                cycles += 8;
             }
         }
         else if (z == 2) {
@@ -384,7 +461,7 @@ void CPU::execute_next_instr() {
                     HL -= 1;
                     PC += 1;
                 }
-
+                cycles += 8;
             }
             else if (q == 1) {
                 if (p == 0) {
@@ -409,6 +486,7 @@ void CPU::execute_next_instr() {
                     HL -= 1;
                     PC += 1;
                 }
+                cycles += 8;
             }
         }
         else if (z == 3) {
@@ -422,34 +500,48 @@ void CPU::execute_next_instr() {
                 rp(p) -= 1;
                 PC += 1;
             }
+            cycles += 8;
         }
         else if (z == 4) {
             // INC r[y]
             N_ = 0;
             H_ = half_carry_8(r(y), 1);
             r(y) += 1;
-            Z_ = (r(y) == 0)? 1: 0;
+            Z_ = (r(y) == 0) ? 1 : 0;
             PC += 1;
-
+            cycles += 4;
+            if ((instr & 0xF0) == 0x30) {
+                cycles += 8;
+            }
         }
         else if (z == 5) {
             // DEC r[y]
             N_ = 1;
             H_ = half_borrow_8(r(y), 1);
             r(y) -= 1;
-            Z_ = (r(y) == 0)? 1: 0;
+            Z_ = (r(y) == 0) ? 1 : 0;
             PC += 1;
+            cycles += 4;
+            if ((instr & 0xF0) == 0x30) {
+                cycles += 8;
+            }
         }
         else if (z == 6) {
             // LD r[y], n
             r(y) = memory->load_byte(PC + 1);
             PC += 2;
+            cycles += 8;
+            if ((instr & 0xF0) == 0x30) {
+                cycles += 4;
+            }
         }
         else if (z == 7) {
             if (y <= 3) {
+                // RRCA, RLCA, RRA, RLA
                 rot(y, 7);
                 Z_ = 0;
                 PC += 1;
+                cycles += 4;
             }
             else if (y == 4) {
                 // DAA
@@ -484,7 +576,7 @@ void CPU::execute_next_instr() {
                     Z_ = 1;
                 }
 
-                A = (uint8_t)a;
+                A = (uint8_t) a;
                 PC += 1;
             }
             else if (y == 5) {
@@ -508,17 +600,34 @@ void CPU::execute_next_instr() {
                 H_ = 0;
                 PC += 1;
             }
+            cycles += 4;
         }
     }
     else if (x == 1) {
-        // LD r[y], r[z]
-        r(y) = r(z);
-        PC += 1;
+        if (instr == 0x76) {
+            // HALT
+            halted = true;
+            PC += 1;
+            cycles += 4;
+        }
+        else {
+            // LD r[y], r[z]
+            r(y) = r(z);
+            PC += 1;
+            cycles += 4;
+            if (y == 6 or z == 6) {
+                cycles += 4;
+            }
+        }
     }
     else if (x == 2) {
         // ALU[y] r[z]
         alu(y, r(z));
         PC += 1;
+        cycles += 4;
+        if (z == 6) {
+            cycles += 4;
+        }
     }
     else if (x == 3) {
         if (z == 0) {
@@ -527,18 +636,27 @@ void CPU::execute_next_instr() {
                 uint8_t n = memory->load_byte(PC + 1);
                 memory->store_byte(0xFF00 + n, A);
                 PC += 2;
+                cycles += 12;
             }
             else if (instr == 0xF0) {
                 // LD A, (0xFF00 + n) ~ LDH A, n
                 uint8_t n = memory->load_byte(PC + 1);
                 A = memory->load_byte(0xFF00 + n);
                 PC += 2;
+                cycles += 12;
             }
             else {
-                // RET cc[y]
-                if (y <  4 && cc(y)) {
-                    PC = memory->load_word(SP);
-                    SP += 2;
+                if (y < 4) {
+                    // RET cc[y]
+                    if (cc(y)) {
+                        PC = memory->load_word(SP);
+                        SP += 2;
+                        cycles += 20;
+                    }
+                    else {
+                        PC += 1;
+                        cycles += 8;
+                    }
                 }
                 else if (instr == 0xF8) {
                     // LD HL SP + n
@@ -549,6 +667,7 @@ void CPU::execute_next_instr() {
                     C_ = (((SP & 0xFF) + (d & 0xFF)) > 0xFF);
                     HL = SP + d;
                     PC += 2;
+                    cycles += 12;
                 }
                 else if (instr == 0xE8) {
                     // ADD SP, n
@@ -559,9 +678,12 @@ void CPU::execute_next_instr() {
                     C_ = (((SP & 0xFF) + (d & 0xFF)) > 0xFF);
                     SP += d;
                     PC += 2;
+                    cycles += 16;
                 }
                 else {
+                    // NOP
                     PC += 1;
+                    cycles += 4;
                 }
             }
         }
@@ -571,27 +693,32 @@ void CPU::execute_next_instr() {
                 rp2(p) = memory->load_word(SP);
                 SP += 2;
                 PC += 1;
+                cycles += 12;
             }
             else if (q == 1) {
                 if (p == 0) {
                     // RET
                     PC = memory->load_word(SP);
                     SP += 2;
+                    cycles += 16;
                 }
                 else if (p == 1) {
                     // RETI
                     PC = memory->load_word(SP);
                     SP += 2;
                     ime_flag = true;
+                    cycles += 16;
                 }
                 else if (p == 2) {
                     // JP HL
                     PC = HL;
+                    cycles += 4;
                 }
                 else if (p == 3) {
                     // LD SP, HL
                     SP = HL;
                     PC += 1;
+                    cycles += 8;
                 }
             }
         }
@@ -600,69 +727,90 @@ void CPU::execute_next_instr() {
                 // JP cc nn
                 if (cc(y)) {
                     PC = memory->load_word(PC + 1);
+                    cycles += 16;
                 }
                 else {
                     PC += 3;
+                    cycles += 12;
                 }
             }
-            else if (instr == 0xEA){
+            else if (instr == 0xEA) {
                 // LD (nn), A
                 uint16_t nn = memory->load_word(PC + 1);
                 memory->store_byte(nn, A);
                 PC += 3;
+                cycles += 16;
             }
             else if (instr == 0xE2) {
                 // LD (C), A
                 memory->store_byte(0xFF00 + C, A);
                 PC += 1;
+                cycles += 8;
             }
             else if (instr == 0xFA) {
                 // LD A, (nn)
                 uint16_t nn = memory->load_word(PC + 1);
                 A = memory->load_byte(nn);
                 PC += 3;
+                cycles += 16;
             }
             else if (instr == 0xF2) {
                 // LD A, (C)
                 A = memory->load_byte(0xFF00 + C);
                 PC += 1;
+                cycles += 8;
             }
             else {
                 // NOP
                 PC += 1;
+                cycles += 4;
             }
         }
         else if (z == 3) {
             if (y == 0) {
                 // JP nn
                 PC = memory->load_word(PC + 1);
+                cycles += 16;
             }
             else if (y == 3) {
                 PC += 1;
+                cycles += 4;
             }
             else if (y == 4) {
                 PC += 1;
+                cycles += 4;
             }
             else if (y == 6) {
                 // DI
                 ime_flag = false;
                 PC += 1;
+                cycles += 4;
             }
             else if (y == 7) {
                 // EI
                 ime_flag = true;
                 PC += 1;
+                cycles += 4;
             }
         }
         else if (z == 4) {
             // CALL cc[y], nn
-            if (y < 4 && cc(y)) {
-                SP -= 2;
-                memory->store_word(SP, PC + 3);
-                PC = memory->load_word(PC + 1);
+            if (y < 4) {
+                if (cc(y)) {
+                    SP -= 2;
+                    memory->store_word(SP, PC + 3);
+                    PC = memory->load_word(PC + 1);
+                    cycles += 24;
+                }
+                else {
+                    PC += 3;
+                    cycles += 12;
+                }
             }
             else {
-                PC += 3;
+                // NOP
+                PC += 1;
+                cycles += 4;
             }
 
         }
@@ -672,6 +820,7 @@ void CPU::execute_next_instr() {
                 SP -= 2;
                 memory->store_word(SP, rp2(p));
                 PC += 1;
+                cycles += 16;
             }
             else if (q == 1) {
                 if (p == 0) {
@@ -679,9 +828,12 @@ void CPU::execute_next_instr() {
                     SP -= 2;
                     memory->store_word(SP, PC + 3);
                     PC = memory->load_word(PC + 1);
+                    cycles += 24;
                 }
                 else {
+                    // NOP
                     PC += 1;
+                    cycles += 4;
                 }
             }
         }
@@ -689,89 +841,105 @@ void CPU::execute_next_instr() {
             // ALU[y], n
             alu(y, memory->load_byte(PC + 1));
             PC += 2;
+            cycles += 8;
         }
         else if (z == 7) {
             // RST y*8
             SP -= 2;
             memory->store_word(SP, PC + 1);
             PC = y * 8;
+            cycles += 16;
         }
     }
+
     F = F & 0xF0; // Discard last 4 bits of F
-    instructions += 1;
+    num_instructions += 1;
 
-    // Update LCD
-    // Update Timer
-    // Update Serial
-
-    // Handle the interrupts
-    handle_interrupts();
- }
-
-string CPU::to_string() {
-    ostringstream out;
-
-    uint16_t opcode = memory->load_byte(PC);
-    uint16_t next_opcode = memory->load_byte(PC + 1);
-
-    // Print the number of instructions executed so far
-    out << instructions + 1 << ", ";
-
-    // Print the opcode.
-    out << "Op: " << setfill('0') << setw(2) << hex << uppercase << opcode;
-    out << " " << setfill('0') << setw(2) << hex << uppercase << next_opcode;
-
-    // Print the CPU registers.
-    out << ", PC: " << setfill('0') << setw(4) << hex << uppercase << PC;
-    out << ", AF: " << setfill('0') << setw(4) << hex << uppercase << AF;
-    out << ", BC: " << setfill('0') << setw(4) << hex << uppercase << BC;
-    out << ", DE: " << setfill('0') << setw(4) << hex << uppercase << DE;
-    out << ", HL: " << setfill('0') << setw(4) << hex << uppercase << HL;
-    out << ", SP: " << setfill('0') << setw(4) << hex << uppercase << SP;
-
-    return out.str();
+    return cycles;
 }
 
-uint64_t CPU::get_instructions() {
-    return instructions;
+uint64_t CPU::get_num_instructions() {
+    return num_instructions;
 }
 
-void CPU::handle_interrupts() {
+inline void CPU::handle_interrupts() {
     uint8_t interrupts = memory->load_byte(IE) & memory->load_byte(IF);
 
-    // Check if interrupts are enabled
-    if (!interrupts || !ime_flag) {
+    // Check if any of the enabled interrupts have fired
+    if (!interrupts) {
         return;
     }
 
-    // Push PC onto the stack
-    SP -= 2;
-    memory->store_word(SP, PC);
-    ime_flag = false;
+    halted = false;
+
+    if (!ime_flag) {
+        return;
+    }
+    else {
+        // Push PC onto the stack
+        SP -= 2;
+        ime_flag = false;
+        memory->store_word(SP, PC);
+    }
 
     if (interrupts & 0b00000001) {
         // V-Blank
         PC = 0x0040;
-        memory->get_byte_reference(IF) &= 0b00011110;
+        memory->get_byte_reference(IF) &= 0b11111110;
     }
     else if (interrupts & 0b00000010) {
         // LCD-Stat
         PC = 0x0048;
-        memory->get_byte_reference(IF) &= 0b00011101;
+        memory->get_byte_reference(IF) &= 0b11111101;
     }
     else if (interrupts & 0b00000100) {
         // Timer
         PC = 0x50;
-        memory->get_byte_reference(IF) &= 0b00011011;
+        memory->get_byte_reference(IF) &= 0b11111011;
     }
     else if (interrupts & 0b00001000) {
         // Serial
         PC = 0x0058;
-        memory->get_byte_reference(IF) &= 0b00010111;
+        memory->get_byte_reference(IF) &= 0b11110111;
     }
     else if (interrupts & 0b00010000) {
         // Serial
         PC = 0x0060;
-        memory->get_byte_reference(IF) &= 0b00001111;
+        memory->get_byte_reference(IF) &= 0b11101111;
     }
+}
+
+inline void CPU::update_timer(uint32_t cycles) {
+    timer_cycles += cycles;
+    div_cycles += cycles;
+
+    // Increment the div register.
+    if (div_cycles > 256) {
+        div_cycles -= 256;
+        memory->get_byte_reference(DIV) += 1;
+    }
+
+    uint8_t tac = memory->load_byte(TAC);
+    uint8_t timer = memory->load_byte(TIMA);
+
+    uint32_t times[] = {1024, 16, 64, 256};
+    uint32_t timer_threshold = times[tac & 0b00000011];
+
+    // If timer is not enabled, then don't update it.
+    if (!(tac >> 2)) {
+        return;
+    }
+
+    while (timer_cycles >= timer_threshold) {
+        if (timer == 0xFF) {
+            timer = memory->load_byte(TMA);
+            memory->get_byte_reference(IF) |= 0b00000100;
+        }
+        else {
+            timer += 1;
+        }
+        timer_cycles -= timer_threshold;
+    }
+
+    memory->store_byte(TIMA, timer);
 }

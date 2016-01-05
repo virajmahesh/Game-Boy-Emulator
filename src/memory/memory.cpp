@@ -18,6 +18,7 @@ inline void Memory::initialize_registers() {
     ram[TIMA] = 0x00;
     ram[TMA] = 0x00;
     ram[TAC] = 0x00;
+    ram[IF] = 0xE1;
     ram[NR_10] = 0x80;
     ram[NR_11] = 0xBF;
     ram[NR_12] = 0xF3;
@@ -66,9 +67,15 @@ void Memory::store_byte(uint16_t addr, uint8_t val) {
     else if (0xA000 <= addr and addr <= 0xBFFF) {
         cart->store_byte_ram(addr, val);
     }
-    else if (addr == 0xFF02) {
-        cout << (char)load_byte(0xFF01);
+    else if (addr == SC) {
+        cout << (char)load_byte(SB);
         cout.flush();
+    }
+    else if (addr == DIV) {
+        ram[DIV] = 0;
+    }
+    else if (addr == IF) {
+        ram[addr] = 0xE0 | (val & 0x1F);
     }
     else {
         ram[addr] = val;
