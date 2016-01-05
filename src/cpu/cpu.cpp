@@ -26,7 +26,7 @@ CPU::CPU(Memory *memory) {
 
 #define JR_d() int8_t d = memory->load_byte(PC + 1); PC += d + 2
 
-uint8_t CPU::cc(uint8_t n) {
+inline uint8_t CPU::cc(uint8_t n) {
     switch (n) {
         case 0:
             return !Z_;
@@ -41,7 +41,7 @@ uint8_t CPU::cc(uint8_t n) {
     }
 }
 
-uint16_t & CPU::rp(uint8_t n) {
+inline uint16_t & CPU::rp(uint8_t n) {
     switch (n) {
         case 0:
             return BC;
@@ -56,7 +56,7 @@ uint16_t & CPU::rp(uint8_t n) {
     }
 }
 
-uint16_t & CPU::rp2(uint8_t n) {
+inline uint16_t & CPU::rp2(uint8_t n) {
     switch (n) {
         case 0:
             return BC;
@@ -71,7 +71,7 @@ uint16_t & CPU::rp2(uint8_t n) {
     }
 }
 
-uint8_t & CPU::r(uint8_t n) {
+inline uint8_t & CPU::r(uint8_t n) {
     switch (n) {
         case 0:
             return B;
@@ -358,29 +358,31 @@ inline uint32_t CPU::fetch_execute_instruction() {
         x = instr >> 6;
         y = (instr & 0x38) >> 3;
         z = instr & 0x07;
+
         if (x == 0) {
             rot(y, z);
-            PC += 2;
         }
         else if (x == 1) {
             bit(y, z);
-            PC += 2;
         }
         else if (x == 2) {
             res(y, z);
-            PC += 2;
         }
         else if (x == 3) {
             set(y, z);
-            PC += 2;
         }
         cycles += 8;
-        if ((instr & 0x0F) == 0x06) {
-            cycles += 8;
+
+        if (z == 6) {
+            if (x == 1) {
+                cycles += 4;
+            }
+            else {
+                cycles += 8;
+            }
         }
-        else if ((instr & 0x0F) == 0x0E) {
-            cycles += 8;
-        }
+
+        PC += 2;
     }
     else if (x == 0) {
         if (z == 0) {
@@ -510,7 +512,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
             Z_ = (r(y) == 0) ? 1 : 0;
             PC += 1;
             cycles += 4;
-            if ((instr & 0xF0) == 0x30) {
+            if (y == 6) {
                 cycles += 8;
             }
         }
@@ -522,7 +524,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
             Z_ = (r(y) == 0) ? 1 : 0;
             PC += 1;
             cycles += 4;
-            if ((instr & 0xF0) == 0x30) {
+            if (y == 6) {
                 cycles += 8;
             }
         }
@@ -531,7 +533,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
             r(y) = memory->load_byte(PC + 1);
             PC += 2;
             cycles += 8;
-            if ((instr & 0xF0) == 0x30) {
+            if (y == 6) {
                 cycles += 4;
             }
         }
@@ -541,7 +543,6 @@ inline uint32_t CPU::fetch_execute_instruction() {
                 rot(y, 7);
                 Z_ = 0;
                 PC += 1;
-                cycles += 4;
             }
             else if (y == 4) {
                 // DAA
