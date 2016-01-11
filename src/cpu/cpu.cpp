@@ -4,6 +4,8 @@
 
 #include "cpu.h"
 
+#define JR_d() int8_t d = memory->load_byte(PC + 1); PC += d + 2
+
 CPU::CPU(Memory *memory) {
     // Initialize registers
     AF = 0x11B0;
@@ -23,8 +25,6 @@ CPU::CPU(Memory *memory) {
 
     this->memory = memory;
 }
-
-#define JR_d() int8_t d = memory->load_byte(PC + 1); PC += d + 2
 
 inline uint8_t CPU::cc(uint8_t n) {
     switch (n) {

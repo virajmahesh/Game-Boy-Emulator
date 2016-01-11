@@ -45,7 +45,7 @@ TEST(CPU_Test, Test_NOP) {
 
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x00));
 
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x101, cpu.PC);
 }
@@ -62,7 +62,7 @@ TEST(CPU_Test, Test_LD_nn_addr_SP) {
     EXPECT_CALL(memory, store_word(0x1234, 0x5678)).Times(1);
 
     cpu.SP = 0x5678;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x100 + 3, cpu.PC);
 }
@@ -78,7 +78,7 @@ TEST(CPU_Test, Test_JR_d) {
     EXPECT_CALL(memory, load_byte(0x0101)).Times(1).WillOnce(Return(0xFB));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x100 + 2 - 5, cpu.PC);
 
@@ -86,7 +86,7 @@ TEST(CPU_Test, Test_JR_d) {
     EXPECT_CALL(memory, load_byte(0x0101)).Times(1).WillOnce(Return(0x05));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x100 + 2 + 5, cpu.PC);
 }
@@ -103,7 +103,7 @@ TEST(CPU_Test, Test_JR_cc_d) {
 
     cpu.Z_ = 1;
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x100 + 2, cpu.PC);
 
@@ -113,7 +113,7 @@ TEST(CPU_Test, Test_JR_cc_d) {
 
     cpu.C_ = 0;
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x100 + 2 + 5, cpu.PC);
 
@@ -123,7 +123,7 @@ TEST(CPU_Test, Test_JR_cc_d) {
 
     cpu.Z_ = 1;
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x100 + 2 - 5, cpu.PC);
 
@@ -132,7 +132,7 @@ TEST(CPU_Test, Test_JR_cc_d) {
 
     cpu.C_ = 0;
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x100 + 2, cpu.PC);
 }
@@ -149,7 +149,7 @@ TEST(CPU_Test, Test_LD_rp_nn) {
     EXPECT_CALL(memory, load_word(0x0101)).Times(1).WillOnce(Return(0x1234));
 
     cpu.BC = 0x0000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x1234, cpu.BC);
     EXPECT_EQ(0x100 + 3, cpu.PC);
@@ -160,7 +160,7 @@ TEST(CPU_Test, Test_LD_rp_nn) {
 
     cpu.PC = 0x0100;
     cpu.DE = 0x0000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     // LD DE, nn
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x21));
@@ -168,7 +168,7 @@ TEST(CPU_Test, Test_LD_rp_nn) {
 
     cpu.PC = 0x0100;
     cpu.HL = 0x0000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x1234, cpu.HL);
     EXPECT_EQ(0x100 + 3, cpu.PC);
@@ -179,7 +179,7 @@ TEST(CPU_Test, Test_LD_rp_nn) {
 
     cpu.PC = 0x0100;
     cpu.SP = 0x0000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x1234, cpu.SP);
     EXPECT_EQ(0x100 + 3, cpu.PC);
@@ -197,7 +197,7 @@ TEST(CPU_Test, ADD_HL_rp) {
 
     cpu.HL = 0x1880;
     cpu.BC = 0x0C00;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(1, cpu.H_);
     EXPECT_EQ(0, cpu.C_);
@@ -211,7 +211,7 @@ TEST(CPU_Test, ADD_HL_rp) {
     cpu.PC = 0x0100;
     cpu.HL = 0xF412;
     cpu.DE = 0x2412;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.H_);
     EXPECT_EQ(1, cpu.C_);
@@ -224,7 +224,7 @@ TEST(CPU_Test, ADD_HL_rp) {
 
     cpu.PC = 0x0100;
     cpu.HL = 0x8800;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(1, cpu.H_);
     EXPECT_EQ(1, cpu.C_);
@@ -238,7 +238,7 @@ TEST(CPU_Test, ADD_HL_rp) {
     cpu.PC = 0x0100;
     cpu.HL = 0x8800;
     cpu.SP = 0x0000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.H_);
     EXPECT_EQ(0, cpu.C_);
@@ -261,7 +261,7 @@ TEST(CPU_Test, LD_nn_addr_A) {
     EXPECT_CALL(memory, store_byte(0xABCD, 0x12)).Times(1);
 
     cpu.A = 0x12;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 3, cpu.PC);
 }
@@ -277,7 +277,7 @@ TEST(CPU_Test, JP_nn) {
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xC3));
     EXPECT_CALL(memory, load_word(0x0100 + 1)).Times(1).WillOnce(Return(0x4567));
 
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x4567, cpu.PC);
 }
@@ -293,7 +293,7 @@ TEST(CPU_Test, LD_r_n) {
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x3E));
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0xAB));
 
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xAB, cpu.A);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -303,7 +303,7 @@ TEST(CPU_Test, LD_r_n) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0xCD));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xCD, cpu.B);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -313,7 +313,7 @@ TEST(CPU_Test, LD_r_n) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0xEF));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xEF, cpu.C);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -323,7 +323,7 @@ TEST(CPU_Test, LD_r_n) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x12));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x12, cpu.D);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -333,7 +333,7 @@ TEST(CPU_Test, LD_r_n) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x34));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x34, cpu.E);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -343,7 +343,7 @@ TEST(CPU_Test, LD_r_n) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x56));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x56, cpu.H);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -353,7 +353,7 @@ TEST(CPU_Test, LD_r_n) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x78));
 
     cpu.PC = 0x0100;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x78, cpu.L);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -366,7 +366,7 @@ TEST(CPU_Test, LD_r_n) {
 
     cpu.PC = 0x0100;
     cpu.HL = 0x1234;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x9A, byte);
     EXPECT_EQ(0x0100 + 2, cpu.PC);
@@ -385,7 +385,7 @@ TEST(CPU_Test, LDH_n_A) {
     EXPECT_CALL(memory, store_byte(0xFF00 + 0x07, 0xAB)).Times(1);
 
     cpu.A = 0xAB;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 2, cpu.PC);
 }
@@ -403,7 +403,7 @@ TEST(CPU_Test, CALL_cc_nn) {
     EXPECT_CALL(memory, store_word(0xFFFE - 2, 0x0100 + 3)).Times(1);
 
     cpu.Z_ = 0;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x9988, cpu.PC);
     EXPECT_EQ(0xFFFE - 2, cpu.SP);
@@ -414,7 +414,7 @@ TEST(CPU_Test, CALL_cc_nn) {
     cpu.C_ = 1;
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 3, cpu.PC);
     EXPECT_EQ(0xFFFE, cpu.SP);
@@ -425,7 +425,7 @@ TEST(CPU_Test, CALL_cc_nn) {
     cpu.Z_ = 0;
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 3, cpu.PC);
     EXPECT_EQ(0xFFFE, cpu.SP);
@@ -438,7 +438,7 @@ TEST(CPU_Test, CALL_cc_nn) {
     cpu.C_ = 1;
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xABCD, cpu.PC);
     EXPECT_EQ(0xFFFE - 2, cpu.SP);
@@ -456,7 +456,7 @@ TEST(CPU_Test, CALL_nn) {
     EXPECT_CALL(memory, load_word(0x0100 + 1)).Times(1).WillOnce(Return(0x9988));
     EXPECT_CALL(memory, store_word(0xFFFE - 2, 0x0100 + 3)).Times(1);
 
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x9988, cpu.PC);
     EXPECT_EQ(0xFFFE - 2, cpu.SP);
@@ -476,7 +476,7 @@ TEST(CPU_Test, PUSH_rp2) {
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE;
     cpu.BC = 0x1234;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 1, cpu.PC);
     EXPECT_EQ(0xFFFE - 2, cpu.SP);
@@ -488,7 +488,7 @@ TEST(CPU_Test, PUSH_rp2) {
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE;
     cpu.DE = 0x5678;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 1, cpu.PC);
     EXPECT_EQ(0xFFFE - 2, cpu.SP);
@@ -500,7 +500,7 @@ TEST(CPU_Test, PUSH_rp2) {
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE;
     cpu.HL = 0x9ABC;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 1, cpu.PC);
     EXPECT_EQ(0xFFFE - 2, cpu.SP);
@@ -512,7 +512,7 @@ TEST(CPU_Test, PUSH_rp2) {
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE;
     cpu.AF = 0x1357;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x0100 + 1, cpu.PC);
     EXPECT_EQ(0xFFFE - 2, cpu.SP);
@@ -531,7 +531,7 @@ TEST(CPU_Test, POP_rp2) {
 
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE - 2;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xFFFE, cpu.SP);
     EXPECT_EQ(0x0100 + 1, cpu.PC);
@@ -543,7 +543,7 @@ TEST(CPU_Test, POP_rp2) {
 
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE - 2;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xFFFE, cpu.SP);
     EXPECT_EQ(0x0100 + 1, cpu.PC);
@@ -555,7 +555,7 @@ TEST(CPU_Test, POP_rp2) {
 
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE - 2;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xFFFE, cpu.SP);
     EXPECT_EQ(0x0100 + 1, cpu.PC);
@@ -563,15 +563,15 @@ TEST(CPU_Test, POP_rp2) {
 
     // POP AF
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xF1));
-    EXPECT_CALL(memory, load_word(0xFFFE - 2)).Times(1).WillOnce(Return(0xFFEE));
+    EXPECT_CALL(memory, load_word(0xFFFE - 2)).Times(1).WillOnce(Return(0xFEE0));
 
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE - 2;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xFFFE, cpu.SP);
     EXPECT_EQ(0x0100 + 1, cpu.PC);
-    EXPECT_EQ(0xFFEE, cpu.AF);
+    EXPECT_EQ(0xFEE0, cpu.AF);
 }
 
 /*
@@ -586,7 +586,7 @@ TEST(CPU_Test, RET) {
 
     cpu.PC = 0x0100;
     cpu.SP = 0xFFFE - 2;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0xFFFE, cpu.SP);
     EXPECT_EQ(0x1234,  cpu.PC);
@@ -603,7 +603,7 @@ TEST(CPU_Test, LDH_A_n) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0xEF));
     EXPECT_CALL(memory, load_byte(0xFF00 + 0xEF)).Times(1).WillOnce(Return(0x99));
 
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0x99,cpu.A);
     EXPECT_EQ(0x0100 + 2,  cpu.PC);
@@ -621,7 +621,7 @@ TEST(CPU_Test, RLC_r) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x00));
 
     cpu.B = 0b11010001;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(1, cpu.C_);
@@ -635,7 +635,7 @@ TEST(CPU_Test, RLC_r) {
 
     cpu.PC = 0x0100;
     cpu.C = 0b01010001;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -649,7 +649,7 @@ TEST(CPU_Test, RLC_r) {
 
     cpu.PC = 0x0100;
     cpu.D = 0b00000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(1, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -663,7 +663,7 @@ TEST(CPU_Test, RLC_r) {
 
     cpu.PC = 0x0100;
     cpu.E = 0b10000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(1, cpu.C_);
@@ -677,7 +677,7 @@ TEST(CPU_Test, RLC_r) {
 
     cpu.PC = 0x0100;
     cpu.H = 0b01000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -691,7 +691,7 @@ TEST(CPU_Test, RLC_r) {
 
     cpu.PC = 0x0100;
     cpu.L = 0b10000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(1, cpu.C_);
@@ -707,7 +707,7 @@ TEST(CPU_Test, RLC_r) {
 
     cpu.PC = 0x0100;
     cpu.HL = 0x1234;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -721,7 +721,7 @@ TEST(CPU_Test, RLC_r) {
 
     cpu.PC = 0x0100;
     cpu.A = 0b00001111;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -742,7 +742,7 @@ TEST(CPU_Test, RRC_r) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x08));
 
     cpu.B = 0b11010001;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(1, cpu.C_);
@@ -756,7 +756,7 @@ TEST(CPU_Test, RRC_r) {
 
     cpu.PC = 0x0100;
     cpu.C = 0b01010001;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(1, cpu.C_);
@@ -770,7 +770,7 @@ TEST(CPU_Test, RRC_r) {
 
     cpu.PC = 0x0100;
     cpu.D = 0b00000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(1, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -784,7 +784,7 @@ TEST(CPU_Test, RRC_r) {
 
     cpu.PC = 0x0100;
     cpu.E = 0b10000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -798,7 +798,7 @@ TEST(CPU_Test, RRC_r) {
 
     cpu.PC = 0x0100;
     cpu.H = 0b01000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -812,7 +812,7 @@ TEST(CPU_Test, RRC_r) {
 
     cpu.PC = 0x0100;
     cpu.L = 0b10000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(0, cpu.C_);
@@ -828,7 +828,7 @@ TEST(CPU_Test, RRC_r) {
 
     cpu.PC = 0x0100;
     cpu.HL = 0x1234;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(1, cpu.C_);
@@ -842,7 +842,7 @@ TEST(CPU_Test, RRC_r) {
 
     cpu.PC = 0x0100;
     cpu.A = 0b00001111;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.Z_);
     EXPECT_EQ(1, cpu.C_);
@@ -864,7 +864,7 @@ TEST(CPU_Test, RL_r) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x10));
 
     cpu.B = 0b11101010;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(1, cpu.C_);
     EXPECT_EQ(0, cpu.Z_);
@@ -879,7 +879,7 @@ TEST(CPU_Test, RL_r) {
 
     cpu.PC = 0x0100;
     cpu.C = 0b11101010;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(1, cpu.C_);
     EXPECT_EQ(0, cpu.Z_);
@@ -893,7 +893,7 @@ TEST(CPU_Test, RL_r) {
 
     cpu.PC = 0x0100;
     cpu.D = 0b10000000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(1, cpu.C_);
     EXPECT_EQ(1, cpu.Z_);
@@ -914,7 +914,7 @@ TEST(CPU_Test, RR_r) {
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0x18));
 
     cpu.B = 0b00010000;
-    cpu.execute_next_instr();
+    cpu.fetch_execute_instruction();
 
     EXPECT_EQ(0, cpu.C_);
     EXPECT_EQ(0, cpu.Z_);

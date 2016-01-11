@@ -48,8 +48,6 @@ private:
 
     void update_timer(uint32_t);
 
-    uint32_t fetch_execute_instruction();
-
 public:
     union {
         register16_t AF;
@@ -97,6 +95,8 @@ public:
      * Read and execute the next instruction from memory.
      */
     uint32_t execute_next_instr();
+
+    uint32_t fetch_execute_instruction();
 
     /*
      * @return: Return the CPU registers formatted as strings. Useful for debugging.
