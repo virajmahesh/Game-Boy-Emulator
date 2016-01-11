@@ -1,7 +1,7 @@
 # TODO
 
 1. Trigger LCD related interrupts.
-2. Add support for rendering the window.
+2. ~~Add support for rendering the window.~~
 3. Add support for rendering sprites.
 4. Improve documentation.
 	1. Possibly add support for Doxygen.

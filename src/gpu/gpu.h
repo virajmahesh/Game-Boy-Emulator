@@ -19,8 +19,11 @@
 
 #define V_BLANK_LINES 10
 
-#define WIDTH 160
-#define HEIGHT 144
+#define SCREEN_WIDTH 160
+#define SCREEN_HEIGHT 144
+
+#define BGR_WIDTH 256
+#define BGR_HEIGHT 256
 
 #define TILE_SIZE 16 // Number of bytes per tile.
 #define TILES_PER_ROW 32
@@ -52,6 +55,8 @@ enum GPU_Mode {
 class GPU {
 
 private:
+
+    Pixel palette[4]; // The 4 colors that make up the palette.
 
     const Pixel COLORS[4] = {{255, 255, 255, 0}, {192, 192, 192, 0},
                              {96,  96,  96,  0}, {0, 0, 0, 0}};
@@ -96,6 +101,12 @@ private:
      * Render the entire pixel buffer on the screen.
      */
     void draw_buffer();
+
+    void load_background_into_buffer();
+
+    void load_window_into_buffer();
+
+    void load_sprites_into_buffer();
 
 public:
 
