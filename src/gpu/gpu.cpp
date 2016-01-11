@@ -27,18 +27,22 @@ GPU::GPU(Memory & mem) : memory(mem) {
 }
 
 void GPU::render_screen(uint32_t cpu_cycles) {
+    cycles += cpu_cycles;
     switch (mode) {
         case OAM_ACCESS:
             if (cycles > OAM_ACCESS_TIME) {
                 mode = VRAM_ACCESS;
                 cycles -= OAM_ACCESS_TIME;
+                // Set mode to VRAM
+                memory.get_byte_reference(STAT) |= 0b00000011;
             }
             break;
         case VRAM_ACCESS:
             if (cycles > VRAM_ACCESS_TIME) {
                 mode = H_BLANK;
                 cycles -= VRAM_ACCESS_TIME;
-                // Trigger an H-Blank interrupt if required
+                // Set mode to H-Blank
+                memory.get_byte_reference(STAT) &= 0b11111100;
             }
             break;
         case H_BLANK:
@@ -49,6 +53,8 @@ void GPU::render_screen(uint32_t cpu_cycles) {
                     // Render the pixel buffer on the screen, and trigger a V-Blank interrupt.
                     draw_buffer();
                     memory.get_byte_reference(IF) |= 0b00000001;
+                    memory.get_byte_reference(STAT) &= 0b11111100;
+                    memory.get_byte_reference(STAT) |= 0b00000001;
                 }
                 else {
                     mode = OAM_ACCESS;
@@ -61,12 +67,33 @@ void GPU::render_screen(uint32_t cpu_cycles) {
                 if (memory.load_byte(LY) == SCREEN_HEIGHT + V_BLANK_LINES - 1) {
                     mode = OAM_ACCESS;
                     memory.get_byte_reference(LY) = 0;
+                    memory.get_byte_reference(STAT) &= 0b11111100;
+                    memory.get_byte_reference(STAT) |= 0b00000010;
                 }
                 cycles -= H_BLANK_TIME;
             }
         }
     }
-    cycles += cpu_cycles;
+    // Trigger LCDC interrupts if required
+    uint8_t stat = memory.load_byte(STAT);
+    if (memory.load_byte(LYC) == memory.load_byte(LY)) {
+        if (bit(stat, 6)) {
+            memory.get_byte_reference(IF) |= 0b00000010;
+        }
+        memory.get_byte_reference(STAT) |= 0b00000100;
+    }
+    else {
+        memory.get_byte_reference(STAT) &= 0b11111011;
+    }
+    if (bit(stat, 5) and mode == OAM_ACCESS) {
+        memory.get_byte_reference(IF) |= 0b00000010;
+    }
+    if (bit(stat, 4) and mode == V_BLANK) {
+        memory.get_byte_reference(IF) |= 0b00000010;
+    }
+    if (bit(stat, 3) and mode == H_BLANK) {
+        memory.get_byte_reference(IF) |= 0b00000010;
+    }
 }
 
 void GPU::set_pixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
