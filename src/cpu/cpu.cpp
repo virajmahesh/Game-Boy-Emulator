@@ -292,7 +292,7 @@ inline void CPU::set(uint8_t y, uint8_t z) {
     }
 }
 
-void CPU::execute_next_instr() {
+uint32_t CPU::execute_next_instr() {
     uint32_t cycles = 0;
     if (!halted) {
         cycles = fetch_execute_instruction();
@@ -313,6 +313,8 @@ void CPU::execute_next_instr() {
 
     // Handle the interrupts
     handle_interrupts();
+
+    return cycles;
  }
 
 string CPU::to_string() {

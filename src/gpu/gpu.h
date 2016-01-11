@@ -2,13 +2,13 @@
  * Author: Viraj Mahesh (virajmahesh@gmail.com)
  */
 
-#ifndef GAME_BOY_EMULATOR_GPU_H_H
-#define GAME_BOY_EMULATOR_GPU_H_H
+#ifndef GAME_BOY_EMULATOR_GPU_H
+#define GAME_BOY_EMULATOR_GPU_H
 
 #include <GLFW/glfw3.h>
 
+#include "../util/util.h"
 #include "../memory/memory.h"
-#include "../cpu/bit_manip.h"
 
 #define TILE_MAP_0 0x9000
 #define TILE_MAP_1 0x8000

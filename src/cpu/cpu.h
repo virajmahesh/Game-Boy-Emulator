@@ -26,8 +26,8 @@ class CPU {
 private:
     static const uint64_t CYCLES_PER_SEC = 4194304;
 
-    bool ime_flag; // Master interrupt flag.
     bool halted; // CPU is halted (i.e timer is stopped).
+    bool ime_flag; // Master interrupt flag.
 
     uint64_t num_instructions; // The number of instructions executed.
     uint64_t timer_cycles; // Number of cycles since TIMA register was updated.
@@ -96,7 +96,7 @@ public:
     /*
      * Read and execute the next instruction from memory.
      */
-    void execute_next_instr();
+    uint32_t execute_next_instr();
 
     /*
      * @return: Return the CPU registers formatted as strings. Useful for debugging.
