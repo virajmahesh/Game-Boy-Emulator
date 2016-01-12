@@ -154,7 +154,7 @@ void GPU::load_background_into_buffer() {
 }
 
 void GPU::load_window_into_buffer() {
-    // TODO Debug this
+    // TODO Test this.
     uint8_t lcdc = memory.load_byte(LCDC);
 
     if (!bit(lcdc, 5)) {
@@ -191,6 +191,58 @@ void GPU::load_window_into_buffer() {
     }
 }
 
+void GPU::load_sprites_into_buffer() {
+    uint8_t lcdc = memory.load_byte(LCDC);
+
+    // Load screen scroll.
+    uint8_t scx = memory.load_byte(SCX);
+    uint8_t scy = memory.load_byte(SCY);
+
+    // Parse the sprite palettes.
+    Pixel palettes[2][4];
+    uint8_t palette_0 = memory.load_byte(OBP0);
+    uint8_t palette_1 = memory.load_byte(OBP1);
+    for (int i = 0; i < 4; i++) {
+        palettes[0][i] = COLORS[palette_0 & 0b00000011];
+        palettes[1][i] = COLORS[palette_1 & 0b00000011];
+        palette_0 = palette_0 >> 2;
+        palette_1 = palette_1 >> 2;
+    }
+
+    uint16_t base_address = 0xFE00;
+    uint16_t tile_base_address = 0x8000;
+
+    // For each sprite
+    for (uint32_t i = 0; i < NUM_SPRITES * SPRITE_SIZE; i += SPRITE_SIZE) {
+        uint8_t y = memory.load_byte(base_address + i) + 16;
+        uint8_t x = memory.load_byte(base_address + i + 1) + 8;
+        uint8_t tile_idx = memory.load_byte(base_address + i + 2);
+        uint8_t options = memory.load_byte(base_address + i + 3);
+
+        // For each row in the sprite
+        uint8_t rows = 8; // TODO: Find the right number of rows.
+        for (uint32_t j = 0; j < rows * 2; j += 2) {
+            uint8_t lower = memory.load_byte(tile_base_address + tile_idx * rows * 2 + j);
+            uint8_t upper = memory.load_byte(tile_base_address + tile_idx * rows * 2 + j + 1);
+
+            // For each pixel
+            for (uint8_t p = 0; p < COLUMNS_PER_TILE; p++) {
+                uint8_t palette_idx = (bit(upper, 8 - p) << 1) | bit(lower, 8 - p);
+                // Draw the pixel
+                x = (x - scx) % BGR_WIDTH + p;
+                y = (y - scy) % BGR_HEIGHT + j/2;
+
+                if (x < 0 or x >= SCREEN_WIDTH)
+                    continue;
+                if (y < 0 or y >= SCREEN_HEIGHT)
+                    continue;
+
+                set_pixel(x, y, palettes[bit(options, 4)][palette_idx]);
+            }
+        }
+    }
+}
+
 void GPU::draw_buffer() {
     uint8_t lcdc = memory.load_byte(LCDC);
 
@@ -198,7 +250,7 @@ void GPU::draw_buffer() {
         return;
     }
 
-     // The 4 palette colors
+     // The 4 palette colors for the window and background.
     uint8_t bgp = memory.load_byte(BGP);
     for (int i = 0; i < 4; i++) {
         palette[i] = COLORS[bgp & 0b00000011];
@@ -207,6 +259,7 @@ void GPU::draw_buffer() {
 
     load_background_into_buffer();
     load_window_into_buffer();
+    load_sprites_into_buffer();
 
     glDrawPixels(SCREEN_WIDTH, SCREEN_HEIGHT, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
 

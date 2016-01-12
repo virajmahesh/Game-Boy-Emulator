@@ -2,7 +2,7 @@
 
 1. ~~Trigger LCD related interrupts.~~
 2. ~~Add support for rendering the window.~~
-3. Add support for rendering sprites.
+3. ~~Add support for rendering sprites.~~ Support parsing sprite options.
 4. Improve documentation.
 	1. Possibly add support for Doxygen.
 5. Improve rendering speed.

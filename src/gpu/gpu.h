@@ -10,9 +10,6 @@
 #include "../util/util.h"
 #include "../memory/memory.h"
 
-#define TILE_MAP_0 0x9000
-#define TILE_MAP_1 0x8000
-
 #define OAM_ACCESS_TIME 80
 #define VRAM_ACCESS_TIME 172
 #define H_BLANK_TIME 204
@@ -31,6 +28,9 @@
 
 #define ROWS_PER_TILE 8
 #define COLUMNS_PER_TILE 8
+
+#define NUM_SPRITES 40
+#define SPRITE_SIZE 4 // Size of the sprite in bytes.
 
 /*
  * Represents a single pixel on the screen.
