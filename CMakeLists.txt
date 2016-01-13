@@ -8,7 +8,8 @@ set(SOURCE_FILES src/main/main
                  src/memory/cartridge
                  src/cpu/cpu
                  src/gpu/gpu
-                 src/util/util)
+                 src/util/util
+                 src/input/keyboard)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 

@@ -27,4 +27,8 @@ uint32_t file_size(ifstream & file);
  */
 bool bit(uint8_t x, uint8_t n);
 
+#define reset_bit(x, n) x &= ~(1 << n)
+
+#define set_bit(x, n) x |= (1 << n)
+
 #endif

@@ -8,6 +8,6 @@
 5. Improve rendering speed.
 6. Add support for cartridge RAM and cartridge RAM bank switching.
 7. Add support for sound.
-8. Add support for keyboard input.
+8. ~~Add support for keyboard input.~~
 9. Add support for customizable settings.
 10. Add support for saving and loading state.
