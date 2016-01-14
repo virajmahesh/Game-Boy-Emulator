@@ -1,5 +1,7 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
+ *
+ * Contains miscellaneous utility functions for file I/O, bit manipulation, etc.
  */
 
 #ifndef GAME_BOY_EMULATOR_UTIL_H
@@ -11,24 +13,35 @@
 using namespace std;
 
 /*
- * @return: A byte array containing the contents of the stream.
+ * Clear the nth bit of a byte (i.e set it to 0).
  */
-uint8_t* read_file(ifstream & stream);
+#define reset_bit(x, n) x &= ~(1 << n)
 
 /*
+ * Set the nth bit of a byte to 1.
+ */
+#define set_bit(x, n) x |= (1 << n)
+
+/*
+ * Get the nth bit of a byte.
+ */
+#define get_bit(x, n) ((x & (1 << (n))) >> (n))
+
+/*
+ * @param file: An input stream for the file.
  * @return: The size of the file in bytes.
  */
 uint32_t file_size(ifstream & file);
 
 /*
- * @param x: The byte we are examining.
- * @param n: The bit index we are checking.
- * @return: The nth bit of the given byte.
+ * Read an entire file into memory. Allocates a byte array large enough to
+ * hold the contents of the file. It is the callers responsibility to
+ * ensure that this buffer is deallocated when it is no longer required. The buffer
+ * must be deallocated using `delete`.
+ *
+ * @param file: An input stream for the file.
+ * @return: The contents of the file in a byte array.
  */
-bool bit(uint8_t x, uint8_t n);
-
-#define reset_bit(x, n) x &= ~(1 << n)
-
-#define set_bit(x, n) x |= (1 << n)
+uint8_t* read_file(ifstream & file);
 
 #endif
