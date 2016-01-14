@@ -25,7 +25,7 @@ public:
  */
 TEST(CPU_Test, Test_Flags) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     cpu.F = 0xFF;
     cpu.Z_ = 0;
@@ -41,7 +41,7 @@ TEST(CPU_Test, Test_Flags) {
  */
 TEST(CPU_Test, Test_NOP) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x00));
 
@@ -55,7 +55,7 @@ TEST(CPU_Test, Test_NOP) {
  */
 TEST(CPU_Test, Test_LD_nn_addr_SP) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x08));
     EXPECT_CALL(memory, load_word(0x0101)).Times(1).WillOnce(Return(0x1234));
@@ -72,7 +72,7 @@ TEST(CPU_Test, Test_LD_nn_addr_SP) {
  */
 TEST(CPU_Test, Test_JR_d) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x18));
     EXPECT_CALL(memory, load_byte(0x0101)).Times(1).WillOnce(Return(0xFB));
@@ -96,7 +96,7 @@ TEST(CPU_Test, Test_JR_d) {
  */
 TEST(CPU_Test, Test_JR_cc_d) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // JR NZ d
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x20));
@@ -142,7 +142,7 @@ TEST(CPU_Test, Test_JR_cc_d) {
  */
 TEST(CPU_Test, Test_LD_rp_nn) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // LD BC, nn
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x01));
@@ -190,7 +190,7 @@ TEST(CPU_Test, Test_LD_rp_nn) {
  */
 TEST(CPU_Test, ADD_HL_rp) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // ADD HL, BC
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x09));
@@ -253,7 +253,7 @@ TEST(CPU_Test, ADD_HL_rp) {
  */
 TEST(CPU_Test, LD_nn_addr_A) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // LD (nn), A
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xEA));
@@ -271,7 +271,7 @@ TEST(CPU_Test, LD_nn_addr_A) {
  */
 TEST(CPU_Test, JP_nn) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // JP nn
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xC3));
@@ -287,7 +287,7 @@ TEST(CPU_Test, JP_nn) {
  */
 TEST(CPU_Test, LD_r_n) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // LD A, n
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0x3E));
@@ -377,7 +377,7 @@ TEST(CPU_Test, LD_r_n) {
  */
 TEST(CPU_Test, LDH_n_A) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // LDH n, A
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xE0));
@@ -395,7 +395,7 @@ TEST(CPU_Test, LDH_n_A) {
  */
 TEST(CPU_Test, CALL_cc_nn) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // CALL NZ, nn
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xC4));
@@ -449,7 +449,7 @@ TEST(CPU_Test, CALL_cc_nn) {
  */
 TEST(CPU_Test, CALL_nn) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // CALL nn
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xCD));
@@ -467,7 +467,7 @@ TEST(CPU_Test, CALL_nn) {
  */
 TEST(CPU_Test, PUSH_rp2) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // PUSH BC
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xC5));
@@ -523,7 +523,7 @@ TEST(CPU_Test, PUSH_rp2) {
  */
 TEST(CPU_Test, POP_rp2) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // POP BC
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xC1));
@@ -579,7 +579,7 @@ TEST(CPU_Test, POP_rp2) {
  */
 TEST(CPU_Test, RET) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xC9));
     EXPECT_CALL(memory, load_word(0xFFFE - 2)).Times(1).WillOnce(Return(0x1234));
@@ -597,7 +597,7 @@ TEST(CPU_Test, RET) {
  */
 TEST(CPU_Test, LDH_A_n) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xF0));
     EXPECT_CALL(memory, load_byte(0x0100 + 1)).Times(1).WillOnce(Return(0xEF));
@@ -614,7 +614,7 @@ TEST(CPU_Test, LDH_A_n) {
  */
 TEST(CPU_Test, RLC_r) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // RLC B
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xCB));
@@ -735,7 +735,7 @@ TEST(CPU_Test, RLC_r) {
  */
 TEST(CPU_Test, RRC_r) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // RRC B
     EXPECT_CALL(memory, load_byte(0x0100)).Times(1).WillOnce(Return(0xCB));
@@ -856,7 +856,7 @@ TEST(CPU_Test, RRC_r) {
  */
 TEST(CPU_Test, RL_r) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // RL b
     cpu.C_ = 0;
@@ -906,7 +906,7 @@ TEST(CPU_Test, RL_r) {
  */
 TEST(CPU_Test, RR_r) {
     StrictMock<MockMemory> memory;
-    CPU cpu = CPU(&memory);
+    CPU cpu = CPU(memory);
 
     // RR b
     cpu.C_ = 1;

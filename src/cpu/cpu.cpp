@@ -4,9 +4,20 @@
 
 #include "cpu.h"
 
-#define JR_d() int8_t d = memory->load_byte(PC + 1); PC += d + 2
 
-CPU::CPU(Memory *memory) {
+#define V_BLANK_INTERRUPT 0x01
+#define LCDC_INTERRUPT    0x02
+#define TIMER_INTERRUPT   0x04
+#define SERIAL_INTERRUPT  0x08
+#define JOYPAD_INTERRUPT  0x10
+
+#define V_BLANK_ADDRESS 0x0040
+#define LCDC_ADDRESS    0x0048
+#define TIMER_ADDRESS   0x0050
+#define SERIAL_ADDRESS  0x0058
+#define JOYPAD_ADDRESS  0x0060
+
+CPU::CPU(Memory & mem) : memory(mem) {
     // Initialize registers
     AF = 0x11B0;
     BC = 0x0013;
@@ -22,18 +33,16 @@ CPU::CPU(Memory *memory) {
     // Initialize CPU state flags
     halted = false;
     ime_flag = false;
-
-    this->memory = memory;
 }
 
 inline uint8_t CPU::cc(uint8_t n) {
     switch (n) {
         case 0:
-            return !Z_;
+            return static_cast<uint8_t>(!Z_);
         case 1:
             return Z_;
         case 2:
-            return !C_;
+            return static_cast<uint8_t>(!C_);
         case 3:
             return C_;
         default:
@@ -86,7 +95,7 @@ inline uint8_t & CPU::r(uint8_t n) {
         case 5:
             return L;
         case 6:
-            return memory->get_byte_reference(HL);
+            return memory.get_byte_reference(HL);
         case 7:
             return A;
         default:
@@ -175,35 +184,36 @@ inline void CPU::rot(uint8_t op, uint8_t i) {
             // RRC r[i]
             N_ = 0;
             H_ = 0;
-            C_ = (r(i) & 0x01);
-            r(i) = (r(i) >> 1) | ((r(i) & 0x01) << 7);
+            C_ = get_bit(r(i), 0);
+            r(i) = (r(i) >> 1) | (get_bit(r(i), 0) << 7);
             break;
         case 2:
             // RL r[i]
             N_ = 0;
             H_ = 0;
             r(i) = (r(i) << 1) | C_;
-            C_ = old >> 7;
+            C_ = get_bit(old, 7);
             break;
         case 3:
             // RR r[i]
             N_ = 0;
             H_ = 0;
             r(i) = r(i) >> 1 | (C_ << 7);
-            C_ = old & 0x01;
+            C_ = get_bit(old, 0);
             break;
         case 4:
             // SLA r[i]
             N_ = 0;
             H_ = 0;
-            C_ = (r(i) & 0x80) >> 7;
-            r(i) = (r(i) << 1) & 0xFE;
+            C_ = get_bit(r(i), 7);
+            r(i) = (r(i) << 1);
+            reset_bit(r(i), 0);
             break;
         case 5:
             // SRA r[i]
             N_ = 0;
             H_ = 0;
-            C_ = r(i) & 0x01;
+            C_ = get_bit(r(i), 0);
             r(i) = (r(i) & 0x80) | (r(i) >> 1);
             break;
         case 6:
@@ -217,7 +227,7 @@ inline void CPU::rot(uint8_t op, uint8_t i) {
             // SRL r[i]
             N_ = 0;
             H_ = 0;
-            C_ = r(i) & 0x01;
+            C_ = get_bit(r(i), 0);
             r(i) = r(i) >> 1;
             break;
     }
@@ -227,34 +237,20 @@ inline void CPU::rot(uint8_t op, uint8_t i) {
 inline void CPU::bit(uint8_t b, uint8_t z) {
     H_ = 1;
     N_ = 0;
-    Z_ = !((r(z) & (0x01 << b)) >> b);
+    Z_ = !get_bit(r(z), b);
 }
 
 inline void CPU::res(uint8_t y, uint8_t z) {
     switch (y) {
         case 0:
-            r(z) = r(z) & 0b11111110;
-            break;
         case 1:
-            r(z) = r(z) & 0b11111101;
-            break;
         case 2:
-            r(z) = r(z) & 0b11111011;
-            break;
         case 3:
-            r(z) = r(z) & 0b11110111;
-            break;
         case 4:
-            r(z) = r(z) & 0b11101111;
-            break;
         case 5:
-            r(z) = r(z) & 0b11011111;
-            break;
         case 6:
-            r(z) = r(z) & 0b10111111;
-            break;
         case 7:
-            r(z) = r(z) & 0b01111111;
+            reset_bit(r(z), y);
             break;
         default:
             throw "Invalid bit index";
@@ -264,28 +260,14 @@ inline void CPU::res(uint8_t y, uint8_t z) {
 inline void CPU::set(uint8_t y, uint8_t z) {
     switch (y) {
         case 0:
-            r(z) = r(z) | 0b00000001;
-            break;
         case 1:
-            r(z) = r(z) | 0b00000010;
-            break;
         case 2:
-            r(z) = r(z) | 0b00000100;
-            break;
         case 3:
-            r(z) = r(z) | 0b00001000;
-            break;
         case 4:
-            r(z) = r(z) | 0b00010000;
-            break;
         case 5:
-            r(z) = r(z) | 0b00100000;
-            break;
         case 6:
-            r(z) = r(z) | 0b01000000;
-            break;
         case 7:
-            r(z) = r(z) | 0b10000000;
+            set_bit(r(z), y);
             break;
         default:
             throw "Invalid bit index";
@@ -302,26 +284,18 @@ uint32_t CPU::execute_next_instr() {
         cycles += 4;
     }
 
-    // Update LCD
-    // TODO: Implement this
-
-    // Update Timer
+    // Update Timer.
     update_timer(cycles);
 
-    // Update Serial
-    // TODO: Implement this
-
-    // Handle the interrupts
-    handle_interrupts();
-
+    // TODO: Update the serial transfer register.
     return cycles;
  }
 
 string CPU::to_string() {
     ostringstream out;
 
-    uint16_t opcode = memory->load_byte(PC);
-    uint16_t next_opcode = memory->load_byte(PC + 1);
+    uint16_t opcode = memory.load_byte(PC);
+    uint16_t next_opcode = memory.load_byte(PC + 1);
 
     // Print the number of instructions executed so far
     out << num_instructions + 1 << ", ";
@@ -339,24 +313,24 @@ string CPU::to_string() {
     out << ", SP: " << setfill('0') << setw(4) << hex << uppercase << SP;
     out << ", H: " << halted;
     out << ", I: " << ime_flag;
-    out << ", IF: " << (uint16_t)memory->load_byte(IF);
+    out << ", IF: " << static_cast<uint16_t>(memory.load_byte(IF));
 
     return out.str();
 }
 
 inline uint32_t CPU::fetch_execute_instruction() {
-    uint8_t instr = memory->load_byte(PC);
-    uint8_t x = instr >> 6;
-    uint8_t y = (instr & 0x38) >> 3;
-    uint8_t z = instr & 0x07;
-    uint8_t p = y >> 1;
-    uint8_t q = y % 2;
+    uint8_t instr = memory.load_byte(PC);
+    uint8_t x = instr >> 6; // Bits (6-7) of the instruction.
+    uint8_t y = (instr & 0x38) >> 3; // Bits (3-5) of the instruction.
+    uint8_t z = (instr & 0x07); // Bits (0-2) of the instruction.
+    uint8_t p = y >> 1; // Bits (4-5) of the instruction.
+    uint8_t q = y % 2; // Bit 3 of the instruction.
 
     uint32_t cycles = 0;
 
     if (instr == 0xCB) {
         // CB Prefixed instructions
-        instr = memory->load_byte(PC + 1);
+        instr = memory.load_byte(PC + 1);
         x = instr >> 6;
         y = (instr & 0x38) >> 3;
         z = instr & 0x07;
@@ -395,8 +369,8 @@ inline uint32_t CPU::fetch_execute_instruction() {
             }
             else if (y == 1) {
                 // LD (nn) SP
-                uint16_t nn = memory->load_word(PC + 1);
-                memory->store_word(nn, SP);
+                uint16_t nn = memory.load_word(PC + 1);
+                memory.store_word(nn, SP);
                 PC += 3;
                 cycles += 20;
             }
@@ -407,14 +381,16 @@ inline uint32_t CPU::fetch_execute_instruction() {
             }
             else if (y == 3) {
                 // JR d
-                JR_d();
+                int8_t d = memory.load_byte(PC + 1);
+                PC += d + 2;
                 cycles += 12;
 
             }
             else {
                 // JR cc[y - 4], d
                 if (cc(y - 4)) {
-                    JR_d();
+                    int8_t d = memory.load_byte(PC + 1);
+                    PC += d + 2;
                     cycles += 12;
                 }
                 else {
@@ -426,7 +402,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
         else if (z == 1) {
             if (q == 0) {
                 // LD rp, nn
-                uint16_t nn = memory->load_word(PC + 1);
+                uint16_t nn = memory.load_word(PC + 1);
                 rp(p) = nn;
                 PC += 3;
                 cycles += 12;
@@ -445,23 +421,23 @@ inline uint32_t CPU::fetch_execute_instruction() {
             if (q == 0) {
                 if (p == 0) {
                     // LD (BC), A
-                    memory->store_byte(BC, A);
+                    memory.store_byte(BC, A);
                     PC += 1;
                 }
                 else if (p == 1) {
                     // LD (DE), A
-                    memory->store_byte(DE, A);
+                    memory.store_byte(DE, A);
                     PC += 1;
                 }
                 else if (p == 2) {
                     // LD (HLI), A
-                    memory->store_byte(HL, A);
+                    memory.store_byte(HL, A);
                     HL += 1;
                     PC += 1;
                 }
                 else if (p == 3) {
                     // LD (HLD), A
-                    memory->store_byte(HL, A);
+                    memory.store_byte(HL, A);
                     HL -= 1;
                     PC += 1;
                 }
@@ -470,23 +446,23 @@ inline uint32_t CPU::fetch_execute_instruction() {
             else if (q == 1) {
                 if (p == 0) {
                     // LD A, (BC)
-                    A = memory->load_byte(BC);
+                    A = memory.load_byte(BC);
                     PC += 1;
                 }
                 else if (p == 1) {
                     // LD A, (DE)
-                    A = memory->load_byte(DE);
+                    A = memory.load_byte(DE);
                     PC += 1;
                 }
                 else if (p == 2) {
                     // LD A, (HLI)
-                    A = memory->load_byte(HL);
+                    A = memory.load_byte(HL);
                     HL += 1;
                     PC += 1;
                 }
                 else if (p == 3) {
                     // LD A, (HLD)
-                    A = memory->load_byte(HL);
+                    A = memory.load_byte(HL);
                     HL -= 1;
                     PC += 1;
                 }
@@ -532,7 +508,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
         }
         else if (z == 6) {
             // LD r[y], n
-            r(y) = memory->load_byte(PC + 1);
+            r(y) = memory.load_byte(PC + 1);
             PC += 2;
             cycles += 8;
             if (y == 6) {
@@ -636,15 +612,15 @@ inline uint32_t CPU::fetch_execute_instruction() {
         if (z == 0) {
             if (instr == 0xE0) {
                 // LD (0xFF00 + n), A ~ LDH n, A
-                uint8_t n = memory->load_byte(PC + 1);
-                memory->store_byte(0xFF00 + n, A);
+                uint8_t n = memory.load_byte(PC + 1);
+                memory.store_byte(0xFF00 + n, A);
                 PC += 2;
                 cycles += 12;
             }
             else if (instr == 0xF0) {
                 // LD A, (0xFF00 + n) ~ LDH A, n
-                uint8_t n = memory->load_byte(PC + 1);
-                A = memory->load_byte(0xFF00 + n);
+                uint8_t n = memory.load_byte(PC + 1);
+                A = memory.load_byte(0xFF00 + n);
                 PC += 2;
                 cycles += 12;
             }
@@ -652,7 +628,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
                 if (y < 4) {
                     // RET cc[y]
                     if (cc(y)) {
-                        PC = memory->load_word(SP);
+                        PC = memory.load_word(SP);
                         SP += 2;
                         cycles += 20;
                     }
@@ -663,7 +639,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
                 }
                 else if (instr == 0xF8) {
                     // LD HL SP + n
-                    int8_t d = memory->load_byte(PC + 1);
+                    int8_t d = memory.load_byte(PC + 1);
                     N_ = 0;
                     Z_ = 0;
                     H_ = (((SP & 0x0F) + (d & 0x0F)) > 0x0F);
@@ -674,7 +650,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
                 }
                 else if (instr == 0xE8) {
                     // ADD SP, n
-                    int8_t d = memory->load_byte(PC + 1);
+                    int8_t d = memory.load_byte(PC + 1);
                     Z_ = 0;
                     N_ = 0;
                     H_ = (((SP & 0x0F) + (d & 0x0F)) > 0x0F);
@@ -693,7 +669,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
         else if (z == 1) {
             if (q == 0) {
                 // POP rp2[p]
-                rp2(p) = memory->load_word(SP);
+                rp2(p) = memory.load_word(SP);
                 SP += 2;
                 PC += 1;
                 cycles += 12;
@@ -701,13 +677,13 @@ inline uint32_t CPU::fetch_execute_instruction() {
             else if (q == 1) {
                 if (p == 0) {
                     // RET
-                    PC = memory->load_word(SP);
+                    PC = memory.load_word(SP);
                     SP += 2;
                     cycles += 16;
                 }
                 else if (p == 1) {
                     // RETI
-                    PC = memory->load_word(SP);
+                    PC = memory.load_word(SP);
                     SP += 2;
                     ime_flag = true;
                     cycles += 16;
@@ -729,7 +705,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
             if (y < 4) {
                 // JP cc nn
                 if (cc(y)) {
-                    PC = memory->load_word(PC + 1);
+                    PC = memory.load_word(PC + 1);
                     cycles += 16;
                 }
                 else {
@@ -739,27 +715,27 @@ inline uint32_t CPU::fetch_execute_instruction() {
             }
             else if (instr == 0xEA) {
                 // LD (nn), A
-                uint16_t nn = memory->load_word(PC + 1);
-                memory->store_byte(nn, A);
+                uint16_t nn = memory.load_word(PC + 1);
+                memory.store_byte(nn, A);
                 PC += 3;
                 cycles += 16;
             }
             else if (instr == 0xE2) {
                 // LD (C), A
-                memory->store_byte(0xFF00 + C, A);
+                memory.store_byte(0xFF00 + C, A);
                 PC += 1;
                 cycles += 8;
             }
             else if (instr == 0xFA) {
                 // LD A, (nn)
-                uint16_t nn = memory->load_word(PC + 1);
-                A = memory->load_byte(nn);
+                uint16_t nn = memory.load_word(PC + 1);
+                A = memory.load_byte(nn);
                 PC += 3;
                 cycles += 16;
             }
             else if (instr == 0xF2) {
                 // LD A, (C)
-                A = memory->load_byte(0xFF00 + C);
+                A = memory.load_byte(0xFF00 + C);
                 PC += 1;
                 cycles += 8;
             }
@@ -772,7 +748,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
         else if (z == 3) {
             if (y == 0) {
                 // JP nn
-                PC = memory->load_word(PC + 1);
+                PC = memory.load_word(PC + 1);
                 cycles += 16;
             }
             else if (y == 3) {
@@ -801,8 +777,8 @@ inline uint32_t CPU::fetch_execute_instruction() {
             if (y < 4) {
                 if (cc(y)) {
                     SP -= 2;
-                    memory->store_word(SP, PC + 3);
-                    PC = memory->load_word(PC + 1);
+                    memory.store_word(SP, PC + 3);
+                    PC = memory.load_word(PC + 1);
                     cycles += 24;
                 }
                 else {
@@ -821,7 +797,7 @@ inline uint32_t CPU::fetch_execute_instruction() {
             if (q == 0) {
                 // PUSH rp2[p]
                 SP -= 2;
-                memory->store_word(SP, rp2(p));
+                memory.store_word(SP, rp2(p));
                 PC += 1;
                 cycles += 16;
             }
@@ -829,8 +805,8 @@ inline uint32_t CPU::fetch_execute_instruction() {
                 if (p == 0) {
                     // CALL nn
                     SP -= 2;
-                    memory->store_word(SP, PC + 3);
-                    PC = memory->load_word(PC + 1);
+                    memory.store_word(SP, PC + 3);
+                    PC = memory.load_word(PC + 1);
                     cycles += 24;
                 }
                 else {
@@ -842,15 +818,15 @@ inline uint32_t CPU::fetch_execute_instruction() {
         }
         else if (z == 6) {
             // ALU[y], n
-            alu(y, memory->load_byte(PC + 1));
+            alu(y, memory.load_byte(PC + 1));
             PC += 2;
             cycles += 8;
         }
         else if (z == 7) {
             // RST y*8
             SP -= 2;
-            memory->store_word(SP, PC + 1);
-            PC = y * 8;
+            memory.store_word(SP, PC + 1);
+            PC = y << 3;
             cycles += 16;
         }
     }
@@ -861,14 +837,11 @@ inline uint32_t CPU::fetch_execute_instruction() {
     return cycles;
 }
 
-uint64_t CPU::get_num_instructions() {
-    return num_instructions;
-}
+void CPU::handle_interrupts() {
+    uint8_t interrupt_flag = memory.load_byte(IF);
+    uint8_t interrupts = memory.load_byte(IE) & interrupt_flag;
 
-inline void CPU::handle_interrupts() {
-    uint8_t interrupts = memory->load_byte(IE) & memory->load_byte(IF);
-
-    // Check if any of the enabled interrupts have fired
+    // Check if any of the enabled interrupts have fired.
     if (!interrupts) {
         return;
     }
@@ -879,37 +852,39 @@ inline void CPU::handle_interrupts() {
         return;
     }
     else {
-        // Push PC onto the stack
+        // Push PC onto the stack.
         SP -= 2;
         ime_flag = false;
-        memory->store_word(SP, PC);
+        memory.store_word(SP, PC);
     }
 
-    if (interrupts & 0b00000001) {
-        // V-Blank
-        PC = 0x0040;
-        memory->get_byte_reference(IF) &= 0b11111110;
+    if (interrupts & V_BLANK_INTERRUPT) {
+        // V-Blank interrupt.
+        PC = V_BLANK_ADDRESS;
+        reset_bit(interrupt_flag, 0);
     }
-    else if (interrupts & 0b00000010) {
-        // LCD-Stat
-        PC = 0x0048;
-        memory->get_byte_reference(IF) &= 0b11111101;
+    else if (interrupts & LCDC_INTERRUPT) {
+        // LCDC interrupt.
+        PC = LCDC_ADDRESS;
+        reset_bit(interrupt_flag, 1);
     }
-    else if (interrupts & 0b00000100) {
-        // Timer
-        PC = 0x50;
-        memory->get_byte_reference(IF) &= 0b11111011;
+    else if (interrupts & TIMER_INTERRUPT) {
+        // Timer interrupt.
+        PC = TIMER_ADDRESS;
+        reset_bit(interrupt_flag, 2);
     }
-    else if (interrupts & 0b00001000) {
-        // Serial
-        PC = 0x0058;
-        memory->get_byte_reference(IF) &= 0b11110111;
+    else if (interrupts & SERIAL_INTERRUPT) {
+        // Serial interrupt.
+        PC = SERIAL_ADDRESS;
+        reset_bit(interrupt_flag, 3);
     }
-    else if (interrupts & 0b00010000) {
-        // Serial
-        PC = 0x0060;
-        memory->get_byte_reference(IF) &= 0b11101111;
+    else if (interrupts & JOYPAD_INTERRUPT) {
+        // Joypad interrupt.
+        PC = JOYPAD_ADDRESS;
+        reset_bit(interrupt_flag, 4);
     }
+
+    memory.store_byte(IF, interrupt_flag);
 }
 
 inline void CPU::update_timer(uint32_t cycles) {
@@ -919,11 +894,12 @@ inline void CPU::update_timer(uint32_t cycles) {
     // Increment the div register.
     if (div_cycles > 256) {
         div_cycles -= 256;
-        memory->get_byte_reference(DIV) += 1;
+        memory.get_byte_reference(DIV) += 1;
     }
 
-    uint8_t tac = memory->load_byte(TAC);
-    uint8_t timer = memory->load_byte(TIMA);
+    uint8_t tac = memory.load_byte(TAC);
+    uint8_t timer = memory.load_byte(TIMA);
+    uint8_t interrupt_flag = memory.load_byte(IF);
 
     uint32_t times[] = {1024, 16, 64, 256};
     uint32_t timer_threshold = times[tac & 0b00000011];
@@ -935,8 +911,8 @@ inline void CPU::update_timer(uint32_t cycles) {
 
     while (timer_cycles >= timer_threshold) {
         if (timer == 0xFF) {
-            timer = memory->load_byte(TMA);
-            memory->get_byte_reference(IF) |= 0b00000100;
+            timer = memory.load_byte(TMA);
+            set_bit(interrupt_flag, 2); // Trigger a timer interrupt.
         }
         else {
             timer += 1;
@@ -944,5 +920,6 @@ inline void CPU::update_timer(uint32_t cycles) {
         timer_cycles -= timer_threshold;
     }
 
-    memory->store_byte(TIMA, timer);
+    memory.store_byte(TIMA, timer);
+    memory.store_byte(IF, interrupt_flag);
 }
