@@ -1,5 +1,5 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
  */
 
 #ifndef GAME_BOY_EMULATOR_GPU_H
@@ -7,6 +7,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include "sprite.h"
 #include "../util/util.h"
 #include "../memory/memory.h"
 
@@ -28,24 +29,40 @@
 
 #define ROWS_PER_TILE 8
 #define COLUMNS_PER_TILE 8
+#define TILE_ROW_SIZE 2
 
 #define NUM_SPRITES 40
 #define SPRITE_SIZE 4 // Size of the sprite in bytes.
+#define SPRITE_X_OFFSET 8
+#define SPRITE_Y_OFFSET 16
+
+#define BLACK Pixel(0, 0, 0, 0)
+#define DARK_GREY Pixel(96,  96,  96,  0)
+#define LIGHT_GREY Pixel(192, 192, 192, 0)
+#define WHITE Pixel(255, 255, 255, 0)
 
 /*
  * Represents a single pixel on the screen.
  */
 struct Pixel {
-    uint8_t b; // Blue value
-    uint8_t g; // Green value
+    uint8_t b; // Blue value.
+    uint8_t g; // Green value.
     uint8_t r; // Red value.
     uint8_t a; // Alpha (transparency) value.
+
+    Pixel();
+
+    Pixel(uint8_t b, uint8_t g, uint8_t r, uint8_t a);
+
+    bool operator==(const Pixel & p);
+
+    bool operator != (const Pixel & p);
 };
 
 /*
  * Different modes the GPU can be in.
  */
-enum GPU_Mode {
+enum Mode {
     OAM_ACCESS,
     VRAM_ACCESS,
     H_BLANK,
@@ -56,13 +73,15 @@ class GPU {
 
 private:
 
+    const uint16_t base_addresses[2] = {0x9800, 0x9C00};
+    const uint16_t tile_addresses[2] = {0x9000, 0x8000};
+
+    const Pixel colors[4] = {WHITE, LIGHT_GREY, DARK_GREY, BLACK};
+
     Pixel palette[4]; // The 4 colors that make up the palette.
 
-    const Pixel COLORS[4] = {{255, 255, 255, 0}, {192, 192, 192, 0},
-                             {96,  96,  96,  0}, {0, 0, 0, 0}};
-
     // The number of cycles tracked by the GPU.
-    uint64_t cycles;
+    long cycles;
 
     // Reference to the Game Boy's memory module.
     Memory & memory;
@@ -74,49 +93,23 @@ private:
     Pixel *buffer;
 
     // The current mode that the GPU is in.
-    GPU_Mode mode;
+    Mode mode;
 
-    /*
-     * Set the value of pixel (x, y).
-     *
-     * @param x: The x coordinate of the pixel.
-     * @param y: The y coordinate of the pixel.
-     * @param r: The new red value of the pixel.
-     * @param g: The new green value of the pixel.
-     * @param b: The new blue value of the pixel.
-     * @param a: The new alpha value of the pixel.
-     */
-    void set_pixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+    Pixel get_pixel(int x, int y);
 
-    /*
-     * Set the value of pixel (x, y).
-     *
-     * @param x: The x coordinate of the pixel.
-     * @param y: The y coordinate of the pixel.
-     * @param pixel: The pixel to be copied.
-     */
-    void set_pixel(uint32_t x, uint32_t y, Pixel & pixel);
+    void set_pixel(int x, int y, Pixel & pixel);
 
-    /*
-     * Render the entire pixel buffer on the screen.
-     */
-    void draw_buffer();
-
+    void draw_screen();
     void load_background_into_buffer();
-
     void load_window_into_buffer();
-
     void load_sprites_into_buffer();
 
 public:
 
     GPU(Memory &);
 
-    /*
-     * Redraw the Game Boy screen.
-     *
-     * @param cpu_cycles: The number of cycles the CPU has executed so far.
-     */
+    GLFWwindow* get_window();
+
     void render_screen(uint32_t cpu_cycles);
 };
 
