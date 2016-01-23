@@ -1,9 +1,5 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
- *
- * Interface for the Game Boy's memory. Supports storing and loading data to
- * and from a memory address. Handles memory operations such as ROM bank switching.
- * All memory addresses are 16 bits.
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
  *
  */
 
@@ -53,6 +49,7 @@
 #define WX 0xFF4B
 #define IE 0xFFFF
 
+#define address_between(x, y) x <= address and address <= y
 
 #include <cstdint>
 #include <iostream>
@@ -61,51 +58,74 @@
 
 using namespace std;
 
+/*
+ * Provides access to the entire address space of the Game Boy. Handles
+ * reads and writes to the memory mapped registers and any special behavior
+ * related to those registers.
+ */
 class Memory {
 
 private:
 
-    // Internal RAM
+    // Internal RAM. Includes VRAM and OAM memory.
     uint8_t ram[0xFFFF + 1];
 
-    // The Game boy cartridge we are currently playing
-    Cartridge *cart;
+    // The Game boy cartridge that is currently loaded.
+    Cartridge & cartridge;
 
     void initialize_registers();
+    void copy_sprite_memory(uint8_t);
 
 public:
 
-    /**
-     * Initialize a new Memory object.
-     */
-    Memory();
-
-    Memory(Cartridge *cart);
-
-    /**
-     * Read a byte from memory.
-     */
-    virtual uint8_t load_byte(uint16_t);
-
-    /**
-     * Store a byte in memory.
-     */
-    virtual void store_byte(uint16_t, uint8_t);
-
-    /**
-     * Read a word from memory.
-     */
-    virtual uint16_t load_word(uint16_t);
-
-    /**
-     * Store a word in memory.
-     */
-    virtual void store_word(uint16_t, uint16_t);
+    Memory(Cartridge& cart);
 
     /*
-     * Get a reference to a byte stored in memory.
+     * Read a byte of data from memory.
+     *
+     * @param address: The memory address to read from.
+     * @return: The byte stored at this address.
      */
-    virtual uint8_t & get_byte_reference(uint16_t);
+    virtual uint8_t load_byte(uint16_t address);
+
+    /*
+     * Store a byte in memory.
+     *
+     * @param address: The memory address to write to.
+     * @param value: The byte to be written.
+     */
+    virtual void store_byte(uint16_t address, uint8_t value);
+
+    /*
+     * Read 2 bytes of data from memory.
+     *
+     * @param address: The memory address to read from.
+     * @return: The word stored at this address.
+     */
+    virtual uint16_t load_word(uint16_t address);
+
+    /*
+     * Store 2 bytes in memory.
+     *
+     * @param address: The memory address to write to.
+     * @param value: The word to be written.
+     */
+    virtual void store_word(uint16_t address, uint16_t value);
+
+    /*
+     * @return: A reference to the byte stored in memory.
+     */
+    virtual uint8_t & get_byte_reference(uint16_t address);
+
+    /*
+     * Copy size bytes of data from the Game Boy's memory to the destination
+     * address.
+     *
+     * @param destination: The destination to copy the data to.
+     * @param address: The memory address to start copying from.
+     * @param size: The number of bytes to copy.
+     */
+    virtual void copy(void* destination, uint16_t address, int size);
 };
 
 

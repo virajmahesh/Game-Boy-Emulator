@@ -284,10 +284,9 @@ uint32_t CPU::execute_next_instr() {
         cycles += 4;
     }
 
-    // Update Timer.
+    // Update timer and serial transfer registers.
     update_timer(cycles);
-
-    // TODO: Update the serial transfer register.
+    update_serial(cycles);
     return cycles;
  }
 
@@ -921,5 +920,37 @@ inline void CPU::update_timer(uint32_t cycles) {
     }
 
     memory.store_byte(TIMA, timer);
+    memory.store_byte(IF, interrupt_flag);
+}
+
+inline void CPU::update_serial(uint32_t cycles) {
+    uint8_t sc = memory.load_byte(SC);
+    uint8_t sb = memory.load_byte(SB);
+    uint8_t interrupt_flag = memory.load_byte(IF);
+
+    if (get_bit(sc, 7) && get_bit(sc, 0)) {
+        serial_cycles += cycles;
+
+        if (serial_bits < 0) {
+            serial_bits = 0;
+            serial_cycles = 0;
+        }
+        else if (serial_cycles >= 512) {
+            if (serial_bits > 7) {
+                reset_bit(sc, 7);
+                set_bit(interrupt_flag, 3);
+                serial_bits = -1;
+            }
+            else {
+                sb = sb << 1;
+                set_bit(sb, 0);
+                serial_cycles -= 512;
+                serial_bits += 1;
+            }
+        }
+    }
+
+    memory.store_byte(SB, sb);
+    memory.store_byte(SC, sc);
     memory.store_byte(IF, interrupt_flag);
 }

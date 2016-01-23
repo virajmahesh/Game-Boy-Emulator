@@ -260,7 +260,7 @@ void GPU::load_sprites_into_buffer() {
 
     Sprite s;
     for (int i = 0; i < NUM_SPRITES; i++) {
-        memory.read_sprite(&s, base_address + i * SPRITE_SIZE);
+        memory.copy(&s, base_address + i * SPRITE_SIZE, SPRITE_SIZE);
         // For each row.
         for (int n = 0; n < ROWS_PER_TILE; n++) {
             uint16_t tile_address = tile_base_address + s.tile_idx * TILE_SIZE;

@@ -1,16 +1,11 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
  *
  */
 
 #include "memory.h"
 
-Memory::Memory() : Memory(nullptr) {
-
-}
-
-Memory::Memory(Cartridge * cart) {
-    this->cart = cart;
+Memory::Memory(Cartridge& cart) : cartridge(cart) {
     initialize_registers();
 }
 
@@ -50,66 +45,77 @@ inline void Memory::initialize_registers() {
     ram[IE] = 0x00;
 }
 
-uint8_t Memory::load_byte(uint16_t addr) {
-    if (0x0000 <= addr and addr <= 0x7FFF) {
-        return cart->load_byte_rom(addr);
+uint8_t Memory::load_byte(uint16_t address) {
+    if (address_between(0x0000, 0x7FFF)) {
+        return cartridge.load_byte_rom(address);
     }
-    else if (0xA000 <= addr and addr <= 0xBFFF) {
-        return cart->load_byte_ram(addr);
+    else if (address_between(0xA000, 0xBFFF)) {
+        return cartridge.load_byte_ram(address);
     }
-    return ram[addr];
+    return ram[address];
 }
 
-void Memory::store_byte(uint16_t addr, uint8_t val) {
-    if (0x0000 <= addr and addr <= 0x7FFF) {
-        cart->store_byte_rom(addr, val);
+void Memory::store_byte(uint16_t address, uint8_t val) {
+    if (address_between(0x0000, 0x7FFF)) {
+        cartridge.store_byte_rom(address, val);
     }
-    else if (0xA000 <= addr and addr <= 0xBFFF) {
-        cart->store_byte_ram(addr, val);
+    else if (address_between(0xA000, 0xBFFF)) {
+        cartridge.store_byte_ram(address, val);
     }
-    else if (addr == SC) {
-        cout << (char)load_byte(SB);
-        cout.flush();
-    }
-    else if (addr == DIV) {
+    else if (address == DIV) {
         ram[DIV] = 0;
     }
-    else if (addr == IF) {
-        ram[addr] = 0xE0 | (val & 0x1F);
+    else if (address == IF) {
+        ram[address] = 0xE0 | (val & 0x1F);
+    }
+    else if (address == DMA) {
+        copy_sprite_memory(val);
     }
     else {
-        ram[addr] = val;
+        ram[address] = val;
     }
 }
 
-uint16_t Memory::load_word(uint16_t addr) {
-    if (0x0000 <= addr and addr <= 0x7FFF) {
-        return cart->load_word_rom(addr);
+uint16_t Memory::load_word(uint16_t address) {
+    if (address_between(0x0000, 0x7FFF)) {
+        return cartridge.load_word_rom(address);
     }
-    else if (0xA000 <= addr and addr <= 0xBFFF) {
-        return cart->load_word_ram(addr);
+    else if (address_between(0xA000, 0xBFFF)) {
+        return cartridge.load_word_ram(address);
     }
-    return *reinterpret_cast<uint16_t *>(ram + addr);
+    return *reinterpret_cast<uint16_t *>(ram + address);
 }
 
-void Memory::store_word(uint16_t addr, uint16_t val) {
-    if (0x0000 <= addr and addr <= 0x7FFF) {
-        cart->store_word_rom(addr, val);
+void Memory::store_word(uint16_t address, uint16_t value) {
+    if (address_between(0x0000, 0x7FFF)) {
+        cartridge.store_word_rom(address, value);
     }
-    else if (0xA000 <= addr and addr <= 0xBFFF) {
-        cart->store_word_ram(addr, val);
+    else if (address_between(0xA000, 0xBFFF)) {
+        cartridge.store_word_ram(address, value);
     }
     else {
-        *reinterpret_cast<uint16_t *>(ram + addr) = val;
+        *reinterpret_cast<uint16_t *>(ram + address) = value;
     }
 }
 
-uint8_t & Memory::get_byte_reference(uint16_t addr) {
-    if (0x0000 <= addr and addr <= 0x7FFF) {
-        return cart->get_byte_reference_rom(addr);
+uint8_t & Memory::get_byte_reference(uint16_t address) {
+    if (address_between(0x0000, 0x7FFF)) {
+        return cartridge.get_byte_reference_rom(address);
     }
-    else if (0xA000 <= addr and addr <= 0xBFFF) {
-        return cart->get_byte_reference_ram(addr);
+    else if (address_between(0xA000, 0xBFFF)) {
+        return cartridge.get_byte_reference_ram(address);
     }
-    return ram[addr];
+
+    return ram[address];
+}
+
+void Memory::copy(void *dest, uint16_t addr, int size) {
+    memcpy(dest, ram + addr, size);
+}
+
+inline void Memory::copy_sprite_memory(uint8_t value) {
+    uint16_t cart_addr = value << 8;
+    for (int i = 0; i < 0x9F; i++) {
+        ram[0xFE00 + i] = load_byte(cart_addr + i);
+    }
 }

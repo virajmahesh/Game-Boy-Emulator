@@ -23,7 +23,7 @@
  *
  *  while (Emulator is running) {
  *      cpu.execute_next_instr();
- *      // Graphics and sound processing here
+ *      // Graphics and sound processing here.
  *      cpu.handler_interrupts();
  *  }
  *
@@ -36,9 +36,11 @@ private:
     bool halted; // CPU is halted.
     bool ime_flag; // Master interrupt flag.
 
-    uint64_t num_instructions; // The number of instructions executed.
-    uint64_t timer_cycles; // Number of cycles since the TIMA register was updated.
-    uint64_t div_cycles; // Number of cycles since the DIV register was last updated.
+    int num_instructions; // The number of instructions executed.
+    int div_cycles; // Number of cycles since the DIV register was last updated.
+    int timer_cycles; // Number of cycles since the TIMA register was updated.
+    int serial_cycles; // Number of cycles since the SB register was updated.
+    int serial_bits; // The number of serial bits transferred.
 
     Memory & memory; // The memory that the CPU reads from and writes to.
 
@@ -54,6 +56,7 @@ private:
     void set(uint8_t, uint8_t);
 
     void update_timer(uint32_t);
+    void update_serial(uint32_t);
 
 public:
     // CPU registers.
