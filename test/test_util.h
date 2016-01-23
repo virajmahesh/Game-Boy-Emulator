@@ -1,5 +1,5 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
  *
  * A collection of utility functions for testing.
  */

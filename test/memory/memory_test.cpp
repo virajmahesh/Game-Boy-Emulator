@@ -1,5 +1,5 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
  *
  * Tests that the memory module correctly handles basic load and store operations.
  */
@@ -36,7 +36,8 @@ public:
  * a given address.
  */
 TEST(Memory_Test, Load_And_Store_Byte_RAM) {
-    Memory memory;
+    StrictMock<MockCartridge> mock_cartridge;
+    Memory memory = Memory(mock_cartridge);
 
     uint8_t data = random_byte();
     uint16_t address = random_word(0xC000, 0xCFFF);
@@ -53,7 +54,8 @@ TEST(Memory_Test, Load_And_Store_Byte_RAM) {
  * byte first.
  */
 TEST(Memory_Test, Load_And_Store_Word_RAM) {
-    Memory memory;
+    StrictMock<MockCartridge> mock_cartridge;
+    Memory memory = Memory(mock_cartridge);
 
     uint16_t data = random_word();
     uint16_t address = random_word(0xC000, 0xCFFF);
@@ -74,8 +76,7 @@ TEST(Memory_Test, Load_And_Store_Word_RAM) {
  */
 TEST(Memory_Test, Address_Space_Partitioning_Load_Ops) {
     StrictMock<MockCartridge> mock_cartridge;
-
-    Memory memory = Memory(&mock_cartridge);
+    Memory memory = Memory(mock_cartridge);
 
     uint16_t rom_addr = random_word(0x0000, 0x8000);
     uint16_t ram_addr = random_word(0xA000, 0xBFFF);
@@ -108,8 +109,7 @@ TEST(Memory_Test, Address_Space_Partitioning_Load_Ops) {
  */
 TEST(Memory_Test, Address_Space_Partitioning_Store_Ops) {
     StrictMock<MockCartridge> mock_cartridge;
-
-    Memory memory = Memory(&mock_cartridge);
+    Memory memory = Memory(mock_cartridge);
 
     uint16_t rom_addr = random_word(0x0000, 0x8000);
     uint16_t ram_addr = random_word(0xA000, 0xBFFF);

@@ -1,5 +1,6 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
+ *
  */
 
 #include <gtest/gtest.h>
@@ -11,6 +12,8 @@ using namespace testing;
 
 class MockMemory : public Memory {
 public:
+    MockMemory() : Memory(*static_cast<Cartridge *>(nullptr)) {};
+
     MOCK_METHOD1(load_byte, uint8_t(uint16_t));
     MOCK_METHOD2(store_byte, void(uint16_t, uint8_t));
 

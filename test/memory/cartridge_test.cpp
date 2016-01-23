@@ -1,5 +1,5 @@
 /*
- * Author: Viraj Mahesh (virajmahesh@gmail.com)
+ * @author: Viraj Mahesh (virajmahesh@gmail.com)
  *
  * Tests that the ROM module handles load, store and bank switching
  * operations correctly.
@@ -28,11 +28,11 @@ inline uint16_t rom_bank_mbc_5(uint16_t i, uint16_t j) {
 }
 
 inline uint32_t rom_addr(uint16_t bank, uint16_t addr) {
-    return Cartridge::ROM_BANK_SIZE * bank + addr - 0x4000;
+    return ROM_BANK_SIZE * bank + addr - 0x4000;
 }
 
 inline uint32_t ram_addr(uint8_t bank, uint32_t addr) {
-    return Cartridge::RAM_BANK_SIZE * bank + addr - 0xA000;
+    return RAM_BANK_SIZE * bank + addr - 0xA000;
 }
 
 /*
@@ -40,7 +40,7 @@ inline uint32_t ram_addr(uint8_t bank, uint32_t addr) {
  * controller in 16/8 mode.
  */
 TEST(MBC1_16_8_ROM_Test, Load_Byte_From_ROM_Bank_0) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE;
+    uint32_t rom_size = ROM_BANK_SIZE;
     Cartridge rom = Cartridge(MBC1_16_8, random_byte_array(rom_size), rom_size, 0);
 
     uint16_t addr = random_word(0x0000, 0x4000);
@@ -53,7 +53,7 @@ TEST(MBC1_16_8_ROM_Test, Load_Byte_From_ROM_Bank_0) {
  * controller in 4/32 mode.
  */
 TEST(MBC1_4_32_ROM_Test, Load_Byte_From_ROM_Bank_0) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE;
+    uint32_t rom_size = ROM_BANK_SIZE;
     Cartridge rom = Cartridge(MBC1_4_32, random_byte_array(rom_size), rom_size, 0);
 
     uint16_t addr = random_word(0x0000, 0x4000);
@@ -65,7 +65,7 @@ TEST(MBC1_4_32_ROM_Test, Load_Byte_From_ROM_Bank_0) {
  * Test that Bank 0 is accessible in cartridges with an MBC 2 controller.
  */
 TEST(MBC2_ROM_Test, Load_Byte_From_ROM_Bank_0) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE;
+    uint32_t rom_size = ROM_BANK_SIZE;
     Cartridge rom = Cartridge(MBC2, random_byte_array(rom_size), rom_size, 0);
 
     uint16_t addr = random_word(0x0000, 0x4000);
@@ -77,7 +77,7 @@ TEST(MBC2_ROM_Test, Load_Byte_From_ROM_Bank_0) {
  * Test that Bank 0 is accessible in cartridges with an MBC 3 controller.
  */
 TEST(MBC3_ROM_Test, Load_Byte_From_ROM_Bank_0) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE;
+    uint32_t rom_size = ROM_BANK_SIZE;
     Cartridge rom = Cartridge(MBC3, random_byte_array(rom_size), rom_size, 0);
 
     uint16_t addr = random_word(0x0000, 0x4000);
@@ -89,7 +89,7 @@ TEST(MBC3_ROM_Test, Load_Byte_From_ROM_Bank_0) {
  * Test that Bank 0 is accessible in cartridges with an MBC 5 controller.
  */
 TEST(MBC5_ROM_Test, Load_Byte_From_ROM_Bank_0) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE;
+    uint32_t rom_size = ROM_BANK_SIZE;
     Cartridge rom = Cartridge(MBC5, random_byte_array(rom_size), rom_size, 0);
 
     uint16_t addr = random_word(0x0000, 0x4000);
@@ -103,8 +103,8 @@ TEST(MBC5_ROM_Test, Load_Byte_From_ROM_Bank_0) {
  * and 0x60 banks are inaccessible.
  */
 TEST(MBC1_16_8_ROM_TEST, Bank_Switching) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 128;
-    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 1;
+    uint32_t rom_size = ROM_BANK_SIZE * 128;
+    uint32_t ram_size = RAM_BANK_SIZE * 1;
     Cartridge cart = Cartridge(MBC1_16_8, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint8_t j = 0x00; j <= 0x03; j++) {
@@ -146,8 +146,8 @@ TEST(MBC1_16_8_ROM_TEST, Bank_Switching) {
  * inaccessible.
  */
 TEST(MBC1_4_32_ROM_TEST, Bank_Switching) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 32;
-    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 4;
+    uint32_t rom_size = ROM_BANK_SIZE * 32;
+    uint32_t ram_size = RAM_BANK_SIZE * 4;
     Cartridge cart = Cartridge(MBC1_4_32, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint8_t i = 0x00; i <= 0x01F; i++) {
@@ -184,7 +184,7 @@ TEST(MBC1_4_32_ROM_TEST, Bank_Switching) {
  * 0x4000 - 0x7FFF space. Also tests that the 0x00 bank is inaccessible.
  */
 TEST(MBC2_ROM_TEST, Bank_Switching) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 16;
+    uint32_t rom_size = ROM_BANK_SIZE * 16;
     uint16_t ram_size = 0x200;
 
     Cartridge rom = Cartridge(MBC2, random_byte_array(rom_size), rom_size, ram_size);
@@ -216,8 +216,8 @@ TEST(MBC2_ROM_TEST, Bank_Switching) {
  * 0x4000 - 0x7FFF space. Also tests that the 0x00 bank is inaccessible.
  */
 TEST(MBC3_ROM_TEST, Bank_Switching) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 128;
-    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 4;
+    uint32_t rom_size = ROM_BANK_SIZE * 128;
+    uint32_t ram_size = RAM_BANK_SIZE * 4;
     Cartridge cart = Cartridge(MBC3, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint8_t i = 0x00; i <= 0x7F; i++) {
@@ -254,8 +254,8 @@ TEST(MBC3_ROM_TEST, Bank_Switching) {
  * 0x4000 - 0x7FFF space. Also tests that the 0x00 bank is inaccessible.
  */
 TEST(MBC5_ROM_TEST, Bank_Switching) {
-    uint32_t rom_size = Cartridge::ROM_BANK_SIZE * 512;
-    uint32_t ram_size = Cartridge::RAM_BANK_SIZE * 16;
+    uint32_t rom_size = ROM_BANK_SIZE * 512;
+    uint32_t ram_size = RAM_BANK_SIZE * 16;
     Cartridge cart = Cartridge(MBC5, random_byte_array(rom_size), rom_size, ram_size);
 
     for (uint16_t j = 0x00; j <= 0x01; j++) {
