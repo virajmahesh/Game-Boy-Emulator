@@ -69,9 +69,17 @@ enum Mode {
     V_BLANK
 };
 
+/*
+ * Simulates the behavior of the Game Boy's Graphics Processing Unit (GPU).
+ * Provides methods to update the internal GPU state and render the Game Boy
+ * screen.
+ */
 class GPU {
 
 private:
+
+    static int window_width;
+    static int window_height;
 
     const uint16_t base_addresses[2] = {0x9800, 0x9C00};
     const uint16_t tile_addresses[2] = {0x9000, 0x8000};
@@ -103,14 +111,43 @@ private:
     void load_background_into_buffer();
     void load_window_into_buffer();
     void load_sprites_into_buffer();
+    void set_zoom_factor();
+
+    static void window_resized(GLFWwindow *window, int width, int height);
 
 public:
 
+    /*
+     * Create a new GPU. This also creates a new window in which the Game Boy's
+     * screen will be rendered.
+     *
+     * @param mem: The memory from which the GPU will read from and write to.
+     */
     GPU(Memory &);
 
+    /*
+     * @return: A pointer to the GLFW window that the Game Boy screen is being
+     * rendered to.
+     */
     GLFWwindow* get_window();
 
+    /*
+     * Updates the internal GPU state and redraws the screen if necessary.
+     *
+     * @param cpu_cycles: The number of cpu cycles that have elapsed since the
+     * screen was last rendered.
+     */
     void render_screen(uint32_t cpu_cycles);
+
+    /*
+     * @return: True if the window created by the GPU is still open, otherwise
+     * False.
+     */
+    bool window_open();
 };
+
+
+int GPU::window_width = SCREEN_WIDTH;
+int GPU::window_height = SCREEN_HEIGHT;
 
 #endif

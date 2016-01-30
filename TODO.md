@@ -11,3 +11,4 @@
 8. ~~Add support for keyboard input.~~
 9. Add support for customizable settings.
 10. Add support for saving and loading state.
+11. ~~Scale the Game Boy Screen with the window size.~~

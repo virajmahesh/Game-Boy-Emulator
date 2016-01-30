@@ -36,9 +36,15 @@ GPU::GPU(Memory & mem) : memory(mem) {
 
     glfwSwapInterval(1);
     glfwMakeContextCurrent(window);
+    glfwSetWindowSizeCallback(window, window_resized);
 
     // Create a new buffer of pixels.
     buffer = new Pixel[SCREEN_WIDTH * SCREEN_HEIGHT];
+}
+
+void GPU::window_resized(GLFWwindow *window, int width, int height) {
+    window_width =  width;
+    window_height = height;
 }
 
 void GPU::render_screen(uint32_t cpu_cycles) {
@@ -300,6 +306,13 @@ void GPU::load_sprites_into_buffer() {
     }
 }
 
+void GPU::set_zoom_factor() {
+    float xfactor = (float)window_width/SCREEN_WIDTH;
+    float yfactor = (float)window_height/SCREEN_HEIGHT;
+
+    glPixelZoom(xfactor, yfactor);
+}
+
 void GPU::draw_screen() {
     uint8_t lcdc = memory.load_byte(LCDC);
 
@@ -307,7 +320,7 @@ void GPU::draw_screen() {
         return;
     }
 
-     // Parse the background and window palette.
+    // Parse the background and window palette.
     uint8_t bgp = memory.load_byte(BGP);
     for (int i = 0; i < 4; i++) {
         palette[i] = colors[bgp & 0b00000011];
@@ -317,6 +330,8 @@ void GPU::draw_screen() {
     load_background_into_buffer();
     load_window_into_buffer();
     load_sprites_into_buffer();
+
+    set_zoom_factor();
 
     glDrawPixels(SCREEN_WIDTH, SCREEN_HEIGHT, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
 
