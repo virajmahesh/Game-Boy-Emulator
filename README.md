@@ -1,25 +1,31 @@
 # Game Boy Emulator
 Emulator for the original Game Boy.
 
-## Project Overview
-All source files are in the `src/` directory.
-Source files for tests are in the `test/` directory.
-
-Currently, each module's tests are compiled into their own executable.
-
 ## Building the emulator
 This project supports `cmake`. On systems that support `make`, such as OS X and Linux, you can build the emulator and all tests using the following commands:
 ```
 cmake .
 make
 ```
-   
+
 This will compile the executable to the `bin/` directory at the root level of the project.
-Tests will be compile to the `bin/tests` directory.
+Tests will be compiled to the `bin/tests` directory.
+
+## Testing
+Tests include unit tests as well as Blargg's test ROMs.
+
+If your system supports ctest, you can use it to run the tests using the following commands:
+```
+cd test
+ctest
+```
+Tests can also be run by executing individual test binaries.
+
+The following games are currently known to work with the emulator:
+* Tetris
 
 ## Dependencies
-The emulator depends on `GLFW` and `OpenGL`. The `FindGLFW` cmake module locates the `GLFW` library and links to it at compile time.
-
-## Miscellaneous
-This emulator uses the DMGBoy emulator (https://github.com/rtfpessoa/dmgboy) as a reference emulator. 
+The emulator depends on the following libraries:
+* `GLFW` and `OpenGL` for rendering the screen.
+* `GTest` and `GMock` for testing and mocking.
 
