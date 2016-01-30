@@ -33,6 +33,7 @@ CPU::CPU(Memory & mem) : memory(mem) {
     // Initialize CPU state flags
     halted = false;
     ime_flag = false;
+    num_instructions = 0;
 }
 
 inline uint8_t CPU::cc(uint8_t n) {
@@ -953,4 +954,8 @@ inline void CPU::update_serial(uint32_t cycles) {
     memory.store_byte(SB, sb);
     memory.store_byte(SC, sc);
     memory.store_byte(IF, interrupt_flag);
+}
+
+long unsigned CPU::get_num_instructions() {
+    return num_instructions;
 }

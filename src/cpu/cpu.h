@@ -36,7 +36,7 @@ private:
     bool halted; // CPU is halted.
     bool ime_flag; // Master interrupt flag.
 
-    int num_instructions; // The number of instructions executed.
+    long unsigned num_instructions; // The number of instructions executed.
     int div_cycles; // Number of cycles since the DIV register was last updated.
     int timer_cycles; // Number of cycles since the TIMA register was updated.
     int serial_cycles; // Number of cycles since the SB register was updated.
@@ -141,6 +141,11 @@ public:
      * handler. This also clears the interrupt flag.
      */
     void handle_interrupts();
+
+    /*
+     * @return: The number of instructions executed by the CPU.
+     */
+    long unsigned get_num_instructions();
 };
 
 #endif
