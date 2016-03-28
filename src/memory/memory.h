@@ -49,7 +49,7 @@
 #define WX 0xFF4B
 #define IE 0xFFFF
 
-#define address_between(x, y) x <= address and address <= y
+#define address_between(x, y) (x <= address and address <= y)
 
 #include <cstdint>
 #include <iostream>
@@ -74,7 +74,7 @@ private:
     Cartridge & cartridge;
 
     void initialize_registers();
-    void copy_sprite_memory(uint8_t);
+    void copy_sprite_memory(uint8_t value);
 
 public:
 

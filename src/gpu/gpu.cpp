@@ -4,6 +4,9 @@
 
 #include "gpu.h"
 
+int GPU::window_width = SCREEN_WIDTH;
+int GPU::window_height = SCREEN_HEIGHT;
+
 Pixel::Pixel() {
     b = 255;
     g = 255;
@@ -45,6 +48,11 @@ GPU::GPU(Memory & mem) : memory(mem) {
 void GPU::window_resized(GLFWwindow *window, int width, int height) {
     window_width =  width;
     window_height = height;
+
+    float xfactor = (float)window_width/SCREEN_WIDTH;
+    float yfactor = (float)window_height/SCREEN_HEIGHT;
+
+    glPixelZoom(xfactor, yfactor);
 }
 
 void GPU::render_screen(uint32_t cpu_cycles) {
@@ -300,17 +308,19 @@ void GPU::load_sprites_into_buffer() {
                         continue;
                     }
                 }
+
+                // Parse sprite options.
+                if (s.x_flip) {
+                    x = ROWS_PER_TILE - x - 1;
+                }
+                if (s.y_flip) {
+                    y = COLUMNS_PER_TILE - y - 1;
+                }
+
                 set_pixel(x, y, sprite_pixel);
             }
         }
     }
-}
-
-void GPU::set_zoom_factor() {
-    float xfactor = (float)window_width/SCREEN_WIDTH;
-    float yfactor = (float)window_height/SCREEN_HEIGHT;
-
-    glPixelZoom(xfactor, yfactor);
 }
 
 void GPU::draw_screen() {
@@ -331,8 +341,6 @@ void GPU::draw_screen() {
     load_window_into_buffer();
     load_sprites_into_buffer();
 
-    set_zoom_factor();
-
     glDrawPixels(SCREEN_WIDTH, SCREEN_HEIGHT, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
 
     glfwSwapBuffers(window);
@@ -341,4 +349,8 @@ void GPU::draw_screen() {
 
 GLFWwindow* GPU::get_window() {
     return window;
+}
+
+bool GPU::window_open() {
+    return !static_cast<bool>(glfwWindowShouldClose(window));
 }

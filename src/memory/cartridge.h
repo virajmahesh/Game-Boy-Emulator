@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-#define address_between(x, y) x <= address and address <= y
+#define address_between(x, y) (x <= address and address <= y)
 
 #define ROM_TYPE_ADDR 0x0147
 #define RAM_SIZE_ADDR 0x0149

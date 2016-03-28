@@ -50,27 +50,9 @@ Cartridge::Cartridge(uint8_t* data) {
 
     }
 
-    // TODO: Parse ROM size information (for debugging)
-
-    switch (data[RAM_SIZE_ADDR]) {
-        case 0:
-            ram_size = 0;
-            break;
-        case 1:
-        case 2:
-            ram_size = RAM_BANK_SIZE;
-            break;
-        case 3:
-            ram_size = RAM_BANK_SIZE * 4;
-            break;
-        case 4:
-            ram_size = RAM_BANK_SIZE * 16;
-            break;
-    }
-
-    if (ram_size > 0) {
-        ram_data = new uint8_t[ram_size];
-    }
+    // Allocate maximum possible amount of RAM.
+    ram_size = RAM_BANK_SIZE * 16;
+    ram_data = new uint8_t[ram_size];
 
     rom_bank = 1;
     ram_bank = 0;

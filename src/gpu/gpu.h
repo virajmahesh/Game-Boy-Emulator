@@ -25,7 +25,6 @@
 
 #define TILE_SIZE 16 // Number of bytes per tile.
 #define TILES_PER_ROW 32
-#define TILES_PER_COLUMN 32
 
 #define ROWS_PER_TILE 8
 #define COLUMNS_PER_TILE 8
@@ -111,7 +110,6 @@ private:
     void load_background_into_buffer();
     void load_window_into_buffer();
     void load_sprites_into_buffer();
-    void set_zoom_factor();
 
     static void window_resized(GLFWwindow *window, int width, int height);
 
@@ -145,9 +143,5 @@ public:
      */
     bool window_open();
 };
-
-
-int GPU::window_width = SCREEN_WIDTH;
-int GPU::window_height = SCREEN_HEIGHT;
 
 #endif

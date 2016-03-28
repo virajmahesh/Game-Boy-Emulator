@@ -3,10 +3,7 @@
 
 #include "../cpu/cpu.h"
 #include "../gpu/gpu.h"
-#include "../util/util.h"
-#include "../memory/memory.h"
 #include "../input/keyboard.h"
-#include "../memory/cartridge.h"
 
 using namespace std;
 
@@ -24,7 +21,7 @@ int main(int argc, char **argv) {
     uint32_t cycles = 0;
 
     // Emulator continues to run forever.
-    while (true) {
+    while (gpu.window_open()) {
         cycles = cpu.execute_next_instr();
         cpu.handle_interrupts();
         gpu.render_screen(cycles);
