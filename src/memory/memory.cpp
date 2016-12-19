@@ -69,6 +69,7 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
     }
     else if (address == DIV) {
         ram[DIV] = 0;
+        ram[TIMA] = 0;
     }
     else if (address == IF) {
         ram[address] = 0xE0 | (val & 0x1F);

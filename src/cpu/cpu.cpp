@@ -19,10 +19,10 @@
 
 CPU::CPU(Memory & mem) : memory(mem) {
     // Initialize registers
-    AF = 0x11B0;
-    BC = 0x0013;
-    DE = 0x00D8;
-    HL = 0x014D;
+    AF = 0x0100;
+    BC = 0xFF13;
+    DE = 0x00C1;
+    HL = 0x8403;
     SP = 0xFFFE;
     PC = 0x0100;
 

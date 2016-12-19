@@ -29,6 +29,7 @@
 
 # Binary Folder
 bin/
+build/
 
 # CLion Project Files
 .idea
