@@ -17,8 +17,8 @@ void Keyboard::process_key_events() {
         if (get_bit(joyp, i + ROWS) == 0) {
 
             for (int j = 0; j < ROWS; j++) {
-                // If the key has been pressed, reset the appropriate bit.
 
+                // If the key has been pressed, reset the appropriate bit.
                 if (glfwGetKey(window, keys[i][j]) == GLFW_PRESS) {
                     reset_bit(joyp, j);
                     set_bit(interrupt_flag, 4);

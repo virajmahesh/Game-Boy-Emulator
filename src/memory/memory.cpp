@@ -10,9 +10,13 @@ Memory::Memory(Cartridge& cart) : cartridge(cart) {
 }
 
 inline void Memory::initialize_registers() {
+    memset(ram + 0xFF00, 0xFF, 0xFF);
+
+    ram[SB] = 0x00;
+    ram[SC] = 0x7E;
     ram[TIMA] = 0x00;
     ram[TMA] = 0x00;
-    ram[TAC] = 0x00;
+    ram[TAC] = 0xF8;
     ram[IF] = 0xE1;
     ram[NR_10] = 0x80;
     ram[NR_11] = 0xBF;
@@ -31,8 +35,9 @@ inline void Memory::initialize_registers() {
     ram[NR_44] = 0xBF;
     ram[NR_50] = 0x77;
     ram[NR_51] = 0xF3;
-    ram[NR_52] = 0xF1;
+    ram[NR_52] = 0xF0;
     ram[LCDC] = 0x91;
+    ram[STAT] = 0x83;
     ram[SCY] = 0x00;
     ram[SCX] = 0x00;
     ram[LY] = 0x90;

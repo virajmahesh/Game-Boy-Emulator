@@ -70,13 +70,14 @@ private:
     // Internal RAM. Includes VRAM and OAM memory.
     uint8_t ram[0xFFFF + 1];
 
+    
+public:
+
     // The Game boy cartridge that is currently loaded.
     Cartridge & cartridge;
 
     void initialize_registers();
     void copy_sprite_memory(uint8_t value);
-
-public:
 
     Memory(Cartridge& cart);
 
