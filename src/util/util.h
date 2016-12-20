@@ -44,4 +44,9 @@ uint32_t file_size(ifstream & file);
  */
 uint8_t* read_file(ifstream & file);
 
+/*
+ * @return: The time elapsed since start_time in seconds.
+ */
+long elapsed_time(time_t start_time);
+
 #endif

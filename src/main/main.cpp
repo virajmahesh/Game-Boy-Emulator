@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
     }
 
     glfwTerminate();
+    cout << gpu.screen_hash();
 
     return 0;
 }

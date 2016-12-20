@@ -4,93 +4,98 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <GLFW/glfw3.h>
 
 #include "../../src/cpu/cpu.h"
+#include "../../src/gpu/gpu.h"
+#include "../../src/input/keyboard.h"
 
 using namespace testing;
 
-#define TIMING_TEST_RESULT "instr_timing\n\n\nPassed\n"
-#define INTRUCTIONS_TEST_RESULT "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n"
-
 /*
- * Create an extension of the Memory class that stores all data written to the
- * console in a buffer. Console writes are triggered by writing the value 0x81
- * to the SC register. This writes the value stored in the SB register to the
- * console.
+ * Execute a ROM for the specified number of cycles.
+ *
+ * @param rom_file_name: The path to the ROM you want to execute.
+ * @param max_instructions: The number of instructions to execute before terminating.
+ * @return: The hash of the Game Boy screen.
  */
-class TestMemory : public Memory {
-private:
-    string result;
-
-public:
-    TestMemory(Cartridge & cartridge) : Memory(cartridge) {}
-
-    /*
-     * Checks if 0x81 is being written to the SC register. If it is, then the
-     * character stored in the SB register is appended to the result buffer.
-     * Otherwise, the byte is stored as expected.
-     *
-     * @param address: The memory address to write to.
-     * @param value: The byte to be written.
-     */
-    void store_byte(uint16_t address, uint8_t value) {
-        if (address == SC and value == 0x81) {
-            result += load_byte(SB);
-        }
-        else {
-            Memory::store_byte(address, value);
-        }
-    }
-
-    /*
-     * @return: The data stored in the buffer. Use this method to verify that
-     * the test ran correctly.
-     */
-    string get_result() {
-        return result;
-    }
-};
-
-/*
- * Test that the CPU module correctly executes instructions_test.
- */
-TEST(Integration_Test, Instructions_Test) {
-    ifstream rom_file = ifstream(INTRUCTIONS_TEST_ROM);
+uint64_t execute_rom(const char * rom_file_name, uint32_t max_instructions) {
+    ifstream rom_file = ifstream(rom_file_name);
 
     Cartridge cartridge = Cartridge(read_file(rom_file));
-    TestMemory memory = TestMemory(cartridge);
-
+    Memory memory = Memory(cartridge);
     CPU cpu = CPU(memory);
+    GPU gpu = GPU(memory);
+    Keyboard keyboard = Keyboard(gpu, memory);
 
-    while (cpu.get_num_instructions() < 24750000) {
-        cpu.execute_next_instr();
+    uint32_t cycles = 0;
+
+    while (cpu.get_num_instructions() < max_instructions) {
+        cycles = cpu.execute_next_instr();
         cpu.handle_interrupts();
+        gpu.render_screen(cycles);
+
+        keyboard.process_key_events();
     }
 
-    EXPECT_EQ(INTRUCTIONS_TEST_RESULT, memory.get_result());
+    glfwTerminate();
+    return gpu.screen_hash();
 }
 
 /*
- * Test that the CPU module correctly executes timing_test.
+ * Test that the Emulator correctly executes instructions_test.
  */
-TEST(CPU_ROM_Test, Timing_Test) {
-    ifstream rom_file = ifstream(TIMING_TEST_ROM);
+TEST(CPU_Test, Blargg_CPU_Test) {
+    uint64_t result = execute_rom(BLARGG_CPU_INSTR_TEST_ROM, 25000000);
 
-    Cartridge cartridge = Cartridge(read_file(rom_file));
-    TestMemory memory = TestMemory(cartridge);
-
-    CPU cpu = CPU(memory);
-
-    while (cpu.get_num_instructions() < 900000) {
-        cpu.execute_next_instr();
-        cpu.handle_interrupts();
+    // Verify that the test passed.
+    if (result != 7795912863059) {
+        FAIL();
     }
-
-    EXPECT_EQ(TIMING_TEST_RESULT, memory.get_result());
 }
+
+/*
+ * Test that the Emulator correctly executes Blargg's instruction
+ * timing test rom.
+ */
+TEST(Timing_Test, Blargg_Timing_Test) {
+    uint64_t result = execute_rom(BLARGG_TIMING_TEST_ROM, 900000);
+
+    // Verify that the test passed.
+    if (result != 8825397585559) {
+        FAIL();
+    }
+}
+
+/*
+ * Test that the Emulator correctly executes timing_test.
+ */
+TEST(Timing_Test, DIV_Write_Test) {
+    uint64_t result = execute_rom(DIV_WRITE_TEST_ROM, 700000);
+
+    // Verify that the test passed.
+    if (result != 8645390074175) {
+        FAIL();
+    }
+}
+
+TEST(Timing_Test, TIMA_Increment_Test) {
+    uint64_t result = execute_rom(TIMA_INCREMENT_TEST_ROM, 700000);
+
+    // Verify that the test passed.
+    if (result != 8441599504689) {
+        FAIL();
+    }
+}
+
+/**
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
 
 int main(int argc, char **argv) {
-    srand(time(NULL));
     InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();

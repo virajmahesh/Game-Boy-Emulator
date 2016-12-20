@@ -354,3 +354,14 @@ GLFWwindow* GPU::get_window() {
 bool GPU::window_open() {
     return !static_cast<bool>(glfwWindowShouldClose(window));
 }
+
+uint64_t GPU::screen_hash() {
+    uint32_t *screen = (uint32_t *)buffer;
+    uint64_t hash = 0;
+
+    for (int i = 0; i < SCREEN_WIDTH*SCREEN_HEIGHT; i++) {
+        hash = (hash + (324723947 + screen[i])) ^ 93485734985;
+    }
+
+    return hash;
+}

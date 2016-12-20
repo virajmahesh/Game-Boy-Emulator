@@ -142,6 +142,13 @@ public:
      * False.
      */
     bool window_open();
+
+    /*
+     * Computes the hash of the screen buffer. Used primarily in testing to check if the
+     * screen has changed.
+     * @return The 64-bit hash of the screen buffer.
+     */
+    uint64_t screen_hash();
 };
 
 #endif

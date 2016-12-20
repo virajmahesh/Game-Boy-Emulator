@@ -21,3 +21,7 @@ uint8_t* read_file(ifstream & file) {
     file.read((char *)data, rom_size);
     return data;
 }
+
+long elapsed_time(time_t start_time) {
+    return time(NULL) - start_time;
+}
