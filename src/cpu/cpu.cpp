@@ -33,6 +33,7 @@ CPU::CPU(Memory & mem) : memory(mem) {
     // Initialize CPU state flags
     halted = false;
     ime_flag = false;
+    reload_timer = false;
     num_instructions = 0;
 }
 
@@ -912,9 +913,16 @@ inline void CPU::update_timer(uint32_t cycles) {
         return;
     }
 
+    // Wait 4 cycles before reloading the timer.
+    if (timer_cycles >= 4 && reload_timer) {
+        reload_timer = false;
+        timer = memory.load_byte(TMA);
+    }
+
     while (timer_cycles >= timer_threshold) {
         if (timer == 0xFF) {
-            timer = memory.load_byte(TMA);
+            timer = 0x00;
+            reload_timer = true;
             set_bit(interrupt_flag, 2); // Trigger a timer interrupt.
         }
         else {

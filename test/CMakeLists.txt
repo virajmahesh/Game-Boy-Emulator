@@ -57,6 +57,9 @@ add_definitions(-DTIMA_INCREMENT_3_TEST_ROM="${TIMA_INCREMENT_3_TEST_ROM}")
 set(TIMA_INCREMENT_4_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_increment_4.gb)
 add_definitions(-DTIMA_INCREMENT_4_TEST_ROM="${TIMA_INCREMENT_4_TEST_ROM}")
 
+set(TIMA_RELOAD_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_reload.gb)
+add_definitions(-DTIMA_RELOAD_TEST_ROM="${TIMA_RELOAD_TEST_ROM}")
+
 
 # Build the test binaries.
 add_executable(MemoryTests memory/memory_test ${SOURCE_FILES})

@@ -115,6 +115,15 @@ TEST(Timing_Test, TIMA_Increment_4_Test) {
     }
 }
 
+TEST(Timing_Test, TIMA_Reload_Test) {
+    uint64_t result = execute_rom(TIMA_RELOAD_TEST_ROM, 700000);
+
+    // Verify that the test passed.
+    if (result != 9690194542764) {
+        FAIL();
+    }
+}
+
 /**
  *
  * @param argc
