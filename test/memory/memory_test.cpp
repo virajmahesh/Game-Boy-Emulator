@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <ctime>
+#include <ctype.h>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -71,7 +72,7 @@ TEST(Memory_Test, Load_And_Store_Word_RAM) {
 }
 
 /*
- * Test that the address space is correctly partioned and that calls to
+ * Test that the address space is correctly partitioned and that calls to
  * load are correctly delegated.
  */
 TEST(Memory_Test, Address_Space_Partitioning_Load_Ops) {
@@ -104,7 +105,7 @@ TEST(Memory_Test, Address_Space_Partitioning_Load_Ops) {
 }
 
 /*
- * Test that the address space is correctly partioned and that calls to
+ * Test that the address space is correctly partitioned and that calls to
  * store are correctly delegated.
  */
 TEST(Memory_Test, Address_Space_Partitioning_Store_Ops) {
@@ -124,6 +125,60 @@ TEST(Memory_Test, Address_Space_Partitioning_Store_Ops) {
     memory.store_byte(ram_addr, 0x34);
     memory.store_word(rom_addr, 0x1234);
     memory.store_word(ram_addr, 0x5678);
+}
+
+TEST(Memory_Test, Memory_Flags_Access) {
+    StrictMock<MockCartridge> mock_cartridge;
+    Memory memory = Memory(mock_cartridge);
+
+    EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+
+    memory.set_flag(RESET_DIV_CYCLES_FLAG, true);
+
+    EXPECT_EQ(true, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+
+    memory.set_flag(RESET_TIMER_CYCLES_FLAG, true);
+
+    EXPECT_EQ(true, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(true, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+
+    memory.set_flag(RESET_DIV_CYCLES_FLAG, false);
+
+    EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(true, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+
+    memory.set_flag(RESET_TIMER_CYCLES_FLAG, false);
+
+    EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+}
+
+TEST(Memory_Test, Memory_Flags_Write_to_DIV) {
+    StrictMock<MockCartridge> mock_cartridge;
+    Memory memory = Memory(mock_cartridge);
+
+    EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+
+    memory.store_byte(DIV, 0x00);
+
+    EXPECT_EQ(memory.get_flag(RESET_DIV_CYCLES_FLAG), true);
+    EXPECT_EQ(memory.get_flag(RESET_TIMER_CYCLES_FLAG), true);
+}
+
+TEST(Memory_Test, Memory_Flags_Write_to_TIMA) {
+    StrictMock<MockCartridge> mock_cartridge;
+    Memory memory = Memory(mock_cartridge);
+
+    EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+
+    memory.store_byte(TIMA, 0x00);
+
+    EXPECT_EQ(memory.get_flag(RESET_DIV_CYCLES_FLAG), false);
+    EXPECT_EQ(memory.get_flag(RESET_TIMER_CYCLES_FLAG), true);
 }
 
 int main(int argc, char **argv) {

@@ -285,6 +285,9 @@ uint32_t CPU::execute_next_instr() {
         cycles += 4;
     }
 
+    // Handle memory flags that were raised after executing the instruction.
+    handle_memory_flags();
+
     // Update timer and serial transfer registers.
     update_timer(cycles);
     update_serial(cycles);
@@ -958,4 +961,15 @@ inline void CPU::update_serial(uint32_t cycles) {
 
 long unsigned CPU::get_num_instructions() {
     return num_instructions;
+}
+
+void CPU::handle_memory_flags() {
+    if (memory.get_flag(RESET_DIV_CYCLES_FLAG)) {
+        div_cycles = 0;
+        memory.set_flag(RESET_DIV_CYCLES_FLAG, false);
+    }
+    if (memory.get_flag(RESET_TIMER_CYCLES_FLAG)) {
+        timer_cycles = 0;
+        memory.set_flag(RESET_TIMER_CYCLES_FLAG, false);
+    }
 }

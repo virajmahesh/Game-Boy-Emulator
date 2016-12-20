@@ -49,6 +49,9 @@
 #define WX 0xFF4B
 #define IE 0xFFFF
 
+#define RESET_DIV_CYCLES_FLAG 0
+#define RESET_TIMER_CYCLES_FLAG 1
+
 #define address_between(x, y) (x <= address and address <= y)
 
 #include <cstdint>
@@ -69,6 +72,12 @@ private:
 
     // Internal RAM. Includes VRAM and OAM memory.
     uint8_t ram[0xFFFF + 1];
+
+    // Internal Flags. Used to communicate with the CPU.
+    struct flags {
+        bool reset_div_cycles;
+        bool reset_timer_cycles;
+    } flags;
 
 
 public:
@@ -127,6 +136,17 @@ public:
      * @param size: The number of bytes to copy.
      */
     virtual void copy(void* destination, uint16_t address, int size);
+
+
+    /*
+     * Read and return the value of a memory flag.
+     */
+    bool get_flag(int f);
+
+    /*
+     * Set the value of a memory flag.
+     */
+    void set_flag(int f, bool value);
 };
 
 

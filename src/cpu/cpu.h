@@ -146,6 +146,11 @@ public:
      * @return: The number of instructions executed by the CPU.
      */
     long unsigned get_num_instructions();
+
+    /*
+     * Handle the memory flags that were raised after executing an intstruction.
+     */
+    void handle_memory_flags();
 };
 
 #endif

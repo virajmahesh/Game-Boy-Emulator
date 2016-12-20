@@ -11,6 +11,7 @@ Memory::Memory(Cartridge& cart) : cartridge(cart) {
 
 inline void Memory::initialize_registers() {
     memset(ram + 0xFF00, 0xFF, 0xFF);
+    memset(&flags, false, sizeof(flags));
 
     ram[SB] = 0x00;
     ram[SC] = 0x7E;
@@ -69,7 +70,8 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
     }
     else if (address == DIV) {
         ram[DIV] = 0;
-        ram[TIMA] = 0;
+        flags.reset_div_cycles = true;
+        flags.reset_timer_cycles = true;
     }
     else if (address == IF) {
         ram[address] = 0xE0 | (val & 0x1F);
@@ -124,4 +126,12 @@ inline void Memory::copy_sprite_memory(uint8_t value) {
     for (int i = 0; i < 0x9F; i++) {
         ram[0xFE00 + i] = load_byte(cart_addr + i);
     }
+}
+
+bool Memory::get_flag(int f) {
+    return ((bool *)&flags)[f];
+}
+
+void Memory::set_flag(int f, bool value) {
+    ((bool *)&flags)[f] = value;
 }
