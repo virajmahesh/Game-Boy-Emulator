@@ -79,8 +79,35 @@ TEST(Timing_Test, DIV_Write_Test) {
     }
 }
 
-TEST(Timing_Test, TIMA_Increment_Test) {
-    uint64_t result = execute_rom(TIMA_INCREMENT_TEST_ROM, 700000);
+TEST(Timing_Test, TIMA_Increment_1_Test) {
+    uint64_t result = execute_rom(TIMA_INCREMENT_1_TEST_ROM, 700000);
+
+    // Verify that the test passed.
+    if (result != 8441599504689) {
+        FAIL();
+    }
+}
+
+TEST(Timing_Test, TIMA_Increment_2_Test) {
+    uint64_t result = execute_rom(TIMA_INCREMENT_2_TEST_ROM, 700000);
+
+    // Verify that the test passed.
+    if (result != 7349450390468) {
+        FAIL();
+    }
+}
+
+TEST(Timing_Test, TIMA_Increment_3_Test) {
+    uint64_t result = execute_rom(TIMA_INCREMENT_3_TEST_ROM, 700000);
+
+    // Verify that the test passed.
+    if (result != 8441599504689) {
+        FAIL();
+    }
+}
+
+TEST(Timing_Test, TIMA_Increment_4_Test) {
+    uint64_t result = execute_rom(TIMA_INCREMENT_4_TEST_ROM, 700000);
 
     // Verify that the test passed.
     if (result != 8441599504689) {

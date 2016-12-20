@@ -4,6 +4,7 @@
  */
 
 #include "memory.h"
+#include "../util/util.h"
 
 Memory::Memory(Cartridge& cart) : cartridge(cart) {
     initialize_registers();
