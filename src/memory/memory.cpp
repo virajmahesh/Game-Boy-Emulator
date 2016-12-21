@@ -74,6 +74,23 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
         flags.reset_div_cycles = true;
         flags.reset_timer_cycles = true;
     }
+    else if (address == TIMA) {
+        if (flags.reload_timer_a) { // Overwrite new_timer_value.
+            new_timer_value = val;
+        }
+        else if (flags.reload_timer_b) {
+            // Ignore writes to TIMA in this state.
+        }
+        else {
+            ram[TIMA] = val; // Normal behavior.
+        }
+    }
+    else if (address == TMA) {
+        if (flags.reload_timer_b) {
+            ram[TIMA] = val;
+        }
+        ram[TMA] = val;
+    }
     else if (address == IF) {
         ram[address] = 0xE0 | (val & 0x1F);
     }
@@ -135,4 +152,12 @@ bool Memory::get_flag(int f) {
 
 void Memory::set_flag(int f, bool value) {
     ((bool *)&flags)[f] = value;
+}
+
+void Memory::set_new_timer_value() {
+    new_timer_value = load_byte(TMA);
+}
+
+uint8_t Memory::get_new_timer_value() {
+    return new_timer_value;
 }

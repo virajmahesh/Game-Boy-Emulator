@@ -33,7 +33,6 @@ CPU::CPU(Memory & mem) : memory(mem) {
     // Initialize CPU state flags
     halted = false;
     ime_flag = false;
-    reload_timer = false;
     num_instructions = 0;
 }
 
@@ -914,16 +913,22 @@ inline void CPU::update_timer(uint32_t cycles) {
     }
 
     // Wait 4 cycles before reloading the timer.
-    if (timer_cycles >= 4 && reload_timer) {
-        reload_timer = false;
-        timer = memory.load_byte(TMA);
+    if (timer_cycles >= 4 && memory.get_flag(RELOAD_TIMER_A_FLAG)) {
+        memory.set_flag(RELOAD_TIMER_A_FLAG, false);
+        memory.set_flag(RELOAD_TIMER_B_FLAG, true);
+        timer = memory.get_new_timer_value();
+    }
+
+    else if (timer_cycles >= 8 && memory.get_flag(RELOAD_TIMER_B_FLAG)) {
+        memory.set_flag(RELOAD_TIMER_B_FLAG, false);
     }
 
     while (timer_cycles >= timer_threshold) {
         if (timer == 0xFF) {
             timer = 0x00;
-            reload_timer = true;
-            set_bit(interrupt_flag, 2); // Trigger a timer interrupt.
+            set_bit(interrupt_flag, 2);
+            memory.set_new_timer_value();
+            memory.set_flag(RELOAD_TIMER_A_FLAG, true);
         }
         else {
             timer += 1;
@@ -931,7 +936,7 @@ inline void CPU::update_timer(uint32_t cycles) {
         timer_cycles -= timer_threshold;
     }
 
-    memory.store_byte(TIMA, timer);
+    memory.get_byte_reference(TIMA) = timer;
     memory.store_byte(IF, interrupt_flag);
 }
 

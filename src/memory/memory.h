@@ -49,8 +49,11 @@
 #define WX 0xFF4B
 #define IE 0xFFFF
 
+// Memory flags.
 #define RESET_DIV_CYCLES_FLAG 0
 #define RESET_TIMER_CYCLES_FLAG 1
+#define RELOAD_TIMER_A_FLAG 2
+#define RELOAD_TIMER_B_FLAG 3
 
 #define address_between(x, y) (x <= address and address <= y)
 
@@ -77,7 +80,11 @@ private:
     struct flags {
         bool reset_div_cycles;
         bool reset_timer_cycles;
+        bool reload_timer_a;
+        bool reload_timer_b;
     } flags;
+
+    uint8_t new_timer_value;
 
 
 public:
@@ -147,6 +154,18 @@ public:
      * Set the value of a memory flag.
      */
     void set_flag(int f, bool value);
+
+    /*
+     * @return: The value that the timer should be set to after the timer overflow.
+     * This is usually the value in the TMA register, but
+     */
+    uint8_t get_new_timer_value();
+
+    /*
+     * Sets the new timer value to be the value in the TMA register. The CPU should
+     * call this function immediately after a timer overflow.
+     */
+    void set_new_timer_value();
 };
 
 

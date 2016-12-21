@@ -35,7 +35,6 @@ class CPU {
 private:
     bool halted; // CPU is halted.
     bool ime_flag; // Master interrupt flag.
-    bool reload_timer; // True if the timer is being reloaded.
 
     long unsigned num_instructions; // The number of instructions executed.
     int div_cycles; // Number of cycles since the DIV register was last updated.

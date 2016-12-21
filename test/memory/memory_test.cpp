@@ -133,26 +133,27 @@ TEST(Memory_Test, Memory_Flags_Access) {
 
     EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
     EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RELOAD_TIMER_A_FLAG));
 
     memory.set_flag(RESET_DIV_CYCLES_FLAG, true);
-
     EXPECT_EQ(true, memory.get_flag(RESET_DIV_CYCLES_FLAG));
     EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RELOAD_TIMER_A_FLAG));
 
     memory.set_flag(RESET_TIMER_CYCLES_FLAG, true);
-
     EXPECT_EQ(true, memory.get_flag(RESET_DIV_CYCLES_FLAG));
     EXPECT_EQ(true, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RELOAD_TIMER_A_FLAG));
+
+    memory.set_flag(RELOAD_TIMER_A_FLAG, true);
+    EXPECT_EQ(true, memory.get_flag(RESET_DIV_CYCLES_FLAG));
+    EXPECT_EQ(true, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+    EXPECT_EQ(true, memory.get_flag(RELOAD_TIMER_A_FLAG));
 
     memory.set_flag(RESET_DIV_CYCLES_FLAG, false);
-
     EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
     EXPECT_EQ(true, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
-
-    memory.set_flag(RESET_TIMER_CYCLES_FLAG, false);
-
-    EXPECT_EQ(false, memory.get_flag(RESET_DIV_CYCLES_FLAG));
-    EXPECT_EQ(false, memory.get_flag(RESET_TIMER_CYCLES_FLAG));
+    EXPECT_EQ(false, memory.get_flag(RELOAD_TIMER_A_FLAG));
 }
 
 TEST(Memory_Test, Memory_Flags_Write_to_DIV) {
