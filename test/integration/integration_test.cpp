@@ -133,6 +133,15 @@ TEST(Timing_Test, TIMA_Reload_Write_Test) {
     }
 }
 
+TEST(Timing_Test, TMA_Reload_Write_Test) {
+    uint64_t result = execute_rom(TMA_RELOAD_WRITE_TEST_ROM, 700000);
+
+    // Verify that the test passed.
+    if (result != 7099757054536) {
+        FAIL();
+    }
+}
+
 /**
  *
  * @param argc

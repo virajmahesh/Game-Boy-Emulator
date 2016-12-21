@@ -63,6 +63,9 @@ add_definitions(-DTIMA_RELOAD_TEST_ROM="${TIMA_RELOAD_TEST_ROM}")
 set(TIMA_RELOAD_WRITE_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_write_reload.gb)
 add_definitions(-DTIMA_RELOAD_WRITE_TEST_ROM="${TIMA_RELOAD_WRITE_TEST_ROM}")
 
+set(TMA_RELOAD_WRITE_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tma_write_reload.gb)
+add_definitions(-DTMA_RELOAD_WRITE_TEST_ROM="${TMA_RELOAD_WRITE_TEST_ROM}")
+
 
 # Build the test binaries.
 add_executable(MemoryTests memory/memory_test ${SOURCE_FILES})

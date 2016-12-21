@@ -90,6 +90,7 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
             ram[TIMA] = val;
         }
         ram[TMA] = val;
+        new_timer_value = load_byte(TMA);
     }
     else if (address == IF) {
         ram[address] = 0xE0 | (val & 0x1F);
