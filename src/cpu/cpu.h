@@ -15,6 +15,8 @@
 #include "../memory/memory.h"
 #include "../util/util.h"
 
+#define TIMER_4096_MODE 4
+
 /*
  * Provides methods for executing instructions, updating register values, and
  * handling interrupts.

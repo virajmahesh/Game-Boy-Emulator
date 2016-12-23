@@ -63,6 +63,16 @@ def test_tima_increment_1():
     assert screen_hash == '7ad768a3131'
 
 
+def test_tima_div_trigger_1():
+    """
+    Test that writes to TMA are correctly handled.
+    """
+    rom_file = '{}/{}'.format(TIMING_TEST_ROM_PATH, 'tima_div_trigger_1.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '7ad768a3131'
+
+
 def test_tima_increment_2():
     """
     Test that the TIMA register is correctly incremented in Timer Mode 2.

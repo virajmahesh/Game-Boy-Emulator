@@ -29,6 +29,7 @@ CPU::CPU(Memory & mem) : memory(mem) {
     // Initialize cycle counters
     div_cycles = 0;
     timer_cycles = 0;
+    total_cycles = 0;
 
     // Initialize CPU state flags
     halted = false;
@@ -891,8 +892,9 @@ void CPU::handle_interrupts() {
 }
 
 inline void CPU::update_timer(uint32_t cycles) {
-    timer_cycles += cycles;
     div_cycles += cycles;
+    timer_cycles += cycles;
+    total_cycles += cycles;
 
     // Increment the div register.
     if (div_cycles > 256) {
@@ -979,6 +981,12 @@ long unsigned CPU::get_num_instructions() {
 
 void CPU::handle_memory_flags() {
     if (memory.get_flag(RESET_DIV_CYCLES_FLAG)) {
+
+        if (get_bit(total_cycles, 9) && memory.load_byte(TAC) == TIMER_4096_MODE) {
+            memory.get_byte_reference(TIMA) += 1;
+
+        }
+
         div_cycles = 0;
         timer_cycles = 0;
         total_cycles = 0;
