@@ -22,7 +22,6 @@ int main(int argc, char **argv) {
 
     // Emulator continues to run forever.
     while (gpu.window_open()) {
-
         cycles = cpu.execute_next_instr();
         cpu.handle_interrupts();
         gpu.render_screen(cycles);

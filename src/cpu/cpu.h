@@ -36,7 +36,9 @@ private:
     bool halted; // CPU is halted.
     bool ime_flag; // Master interrupt flag.
 
-    long unsigned num_instructions; // The number of instructions executed.
+    uint64_t num_instructions; // The number of instructions executed.
+    uint64_t total_cycles; // The total number of cycles the CPU has been executing for.
+
     int div_cycles; // Number of cycles since the DIV register was last updated.
     int timer_cycles; // Number of cycles since the TIMA register was updated.
     int serial_cycles; // Number of cycles since the SB register was updated.

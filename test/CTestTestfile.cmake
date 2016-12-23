@@ -7,4 +7,3 @@
 add_test(CartridgeTests "../bin/tests/CartridgeTests")
 add_test(MemoryTests "../bin/tests/MemoryTests")
 add_test(CPUTests "../bin/tests/CPUTests")
-add_test(IntegrationTests "../bin/tests/IntegrationTests")

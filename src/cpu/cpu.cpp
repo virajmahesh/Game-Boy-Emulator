@@ -926,6 +926,7 @@ inline void CPU::update_timer(uint32_t cycles) {
     while (timer_cycles >= timer_threshold) {
         if (timer == 0xFF) {
             timer = 0x00;
+
             set_bit(interrupt_flag, 2);
             memory.set_new_timer_value();
             memory.set_flag(RELOAD_TIMER_A_FLAG, true);
@@ -979,10 +980,8 @@ long unsigned CPU::get_num_instructions() {
 void CPU::handle_memory_flags() {
     if (memory.get_flag(RESET_DIV_CYCLES_FLAG)) {
         div_cycles = 0;
-        memory.set_flag(RESET_DIV_CYCLES_FLAG, false);
-    }
-    if (memory.get_flag(RESET_TIMER_CYCLES_FLAG)) {
         timer_cycles = 0;
-        memory.set_flag(RESET_TIMER_CYCLES_FLAG, false);
+        total_cycles = 0;
+        memory.set_flag(RESET_DIV_CYCLES_FLAG, false);
     }
 }

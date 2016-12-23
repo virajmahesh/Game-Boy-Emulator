@@ -51,9 +51,8 @@
 
 // Memory flags.
 #define RESET_DIV_CYCLES_FLAG 0
-#define RESET_TIMER_CYCLES_FLAG 1
-#define RELOAD_TIMER_A_FLAG 2
-#define RELOAD_TIMER_B_FLAG 3
+#define RELOAD_TIMER_A_FLAG 1
+#define RELOAD_TIMER_B_FLAG 2
 
 #define address_between(x, y) (x <= address and address <= y)
 
@@ -79,7 +78,6 @@ private:
     // Internal Flags. Used to communicate with the CPU.
     struct flags {
         bool reset_div_cycles;
-        bool reset_timer_cycles;
         bool reload_timer_a;
         bool reload_timer_b;
     } flags;

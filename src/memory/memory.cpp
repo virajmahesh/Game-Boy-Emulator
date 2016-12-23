@@ -72,7 +72,6 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
     else if (address == DIV) {
         ram[DIV] = 0;
         flags.reset_div_cycles = true;
-        flags.reset_timer_cycles = true;
     }
     else if (address == TIMA) {
         if (flags.reload_timer_a) { // Overwrite new_timer_value.

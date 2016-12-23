@@ -30,48 +30,11 @@ set(TEST_ROM_FOLDER ${PROJECT_SOURCE_DIR}/integration/test_roms)
 set(TIMING_TEST_ROM_FOLDER ${TEST_ROM_FOLDER}/timing)
 set(CPU_TEST_ROM_FOLDER ${TEST_ROM_FOLDER}/cpu)
 
-#################
-# CPU Test ROMS #
-#################
-set(BLARGG_CPU_INSTR_TEST_ROM ${CPU_TEST_ROM_FOLDER}/instructions_test.gb)
-add_definitions(-DBLARGG_CPU_INSTR_TEST_ROM="${BLARGG_CPU_INSTR_TEST_ROM}")
-
-####################
-# Timing Test ROMS #
-####################
-set(BLARGG_TIMING_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/timing_test.gb)
-add_definitions(-DBLARGG_TIMING_TEST_ROM="${BLARGG_TIMING_TEST_ROM}")
-
-set(DIV_WRITE_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/div_write.gb)
-add_definitions(-DDIV_WRITE_TEST_ROM="${DIV_WRITE_TEST_ROM}")
-
-set(TIMA_INCREMENT_1_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_increment_1.gb)
-add_definitions(-DTIMA_INCREMENT_1_TEST_ROM="${TIMA_INCREMENT_1_TEST_ROM}")
-
-set(TIMA_INCREMENT_2_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_increment_2.gb)
-add_definitions(-DTIMA_INCREMENT_2_TEST_ROM="${TIMA_INCREMENT_2_TEST_ROM}")
-
-set(TIMA_INCREMENT_3_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_increment_3.gb)
-add_definitions(-DTIMA_INCREMENT_3_TEST_ROM="${TIMA_INCREMENT_3_TEST_ROM}")
-
-set(TIMA_INCREMENT_4_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_increment_4.gb)
-add_definitions(-DTIMA_INCREMENT_4_TEST_ROM="${TIMA_INCREMENT_4_TEST_ROM}")
-
-set(TIMA_RELOAD_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_reload.gb)
-add_definitions(-DTIMA_RELOAD_TEST_ROM="${TIMA_RELOAD_TEST_ROM}")
-
-set(TIMA_RELOAD_WRITE_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tima_write_reload.gb)
-add_definitions(-DTIMA_RELOAD_WRITE_TEST_ROM="${TIMA_RELOAD_WRITE_TEST_ROM}")
-
-set(TMA_RELOAD_WRITE_TEST_ROM ${TIMING_TEST_ROM_FOLDER}/tma_write_reload.gb)
-add_definitions(-DTMA_RELOAD_WRITE_TEST_ROM="${TMA_RELOAD_WRITE_TEST_ROM}")
-
-
 # Build the test binaries.
 add_executable(MemoryTests memory/memory_test ${SOURCE_FILES})
 add_executable(CartridgeTests memory/cartridge_test ${SOURCE_FILES})
 add_executable(CPUTests cpu/cpu_test ${SOURCE_FILES})
-add_executable(IntegrationTests integration/integration_test ${SOURCE_FILES})
+add_executable(IntegrationTest integration/integration_test ${SOURCE_FILES})
 
 # Inject the location of the test ROMs into the tests.
 
@@ -79,7 +42,7 @@ add_executable(IntegrationTests integration/integration_test ${SOURCE_FILES})
 target_link_libraries(MemoryTests ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 target_link_libraries(CartridgeTests ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 target_link_libraries(CPUTests ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
-target_link_libraries(IntegrationTests ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
+target_link_libraries(IntegrationTest ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 
 set(EXECUTABLE_OUTPUT_PATH ../bin/tests)
 
@@ -87,4 +50,3 @@ set(EXECUTABLE_OUTPUT_PATH ../bin/tests)
 add_test(CartridgeTests ${EXECUTABLE_OUTPUT_PATH}/CartridgeTests)
 add_test(MemoryTests ${EXECUTABLE_OUTPUT_PATH}/MemoryTests)
 add_test(CPUTests ${EXECUTABLE_OUTPUT_PATH}/CPUTests)
-add_test(IntegrationTests ${EXECUTABLE_OUTPUT_PATH}/IntegrationTests)
