@@ -1,16 +1,11 @@
 /*
  * @author: Viraj Mahesh
  */
-
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include <GLFW/glfw3.h>
 
 #include "../../src/cpu/cpu.h"
 #include "../../src/gpu/gpu.h"
 #include "../../src/input/keyboard.h"
-
-using namespace testing;
 
 /*
  * Execute a ROM for the specified number of cycles.

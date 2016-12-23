@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.2.3)
 project(Game_Boy_Emulator)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -6,10 +6,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
 enable_testing()
 
-find_package(GTest REQUIRED)
-find_package(GMock REQUIRED)
-find_package(OpenGL)
-find_package(GLFW 3.0.0)
+find_package(GTest)
+find_package(GMock)
+find_package(OpenGL REQUIRED)
+find_package(GLFW 3.0.0 REQUIRED)
 
 # Include the required directories
 include_directories(${OPENGL_INCLUDE_DIRS})
@@ -42,7 +42,7 @@ add_executable(IntegrationTest integration/integration_test ${SOURCE_FILES})
 target_link_libraries(MemoryTests ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 target_link_libraries(CartridgeTests ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 target_link_libraries(CPUTests ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
-target_link_libraries(IntegrationTest ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
+target_link_libraries(IntegrationTest ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 
 set(EXECUTABLE_OUTPUT_PATH ../bin/tests)
 

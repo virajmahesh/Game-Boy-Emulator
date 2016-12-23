@@ -1,0 +1,33 @@
+sudo: required
+
+addons:
+  apt:
+
+    sources:
+      - george-edison55-precise-backports
+      - ubuntu-toolchain-r-test
+      - sourceline: 'deb http://ppa.launchpad.net/keithw/glfw3/ubuntu trusty main'
+
+    packages:
+      - gcc-5
+      - g++-5
+      - cmake
+      - cmake-data
+      - libxxf86vm-dev
+      - libglfw3
+      - libglfw3-dev
+      - libgtest-dev
+
+before_install:
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
+  - pip install --user pytest
+
+install:
+  - mkdir build && cd build
+  - cmake ../
+  - make IntegrationTest
+
+script:
+  - cd ../test/integration
+  - pytest

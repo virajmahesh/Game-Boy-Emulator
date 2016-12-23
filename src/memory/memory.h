@@ -58,6 +58,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <cstring>
 
 #include "cartridge.h"
 
