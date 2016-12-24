@@ -69,6 +69,19 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
     else if (address_between(0xA000, 0xBFFF)) {
         cartridge.store_byte_ram(address, val);
     }
+    else if (address == P1) {
+        ram[P1] = val | 0b11000000;
+    }
+    else if (address == SC) {
+        ram[SC] = val | 0b01111110;
+    }
+    else if (address == 0xFF08  || address == 0xFF09 ||
+             between(0xFF0A, address, 0xFF0E) || address == 0xFF15 ||
+             between(0xFF27, address, 0xFF29) || address == 0xFF1F ||
+             between(0xFF4C, address, 0xFF4F) || address == 0xFF03 ||
+             between(0xFF50, address, 0xFFFE)) {
+        // Ignore Writes.
+    }
     else if (address == DIV) {
         ram[DIV] = 0;
         flags.reset_div_cycles = true;
@@ -87,7 +100,7 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
     else if (address == TAC) {
         old_TAC_value = ram[TAC];
 
-        ram[TAC] = val;
+        ram[TAC] = val | 0b11111000;
         flags.write_to_TAC = true;
     }
     else if (address == TMA) {
@@ -98,7 +111,25 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
         new_timer_value = load_byte(TMA);
     }
     else if (address == IF) {
-        ram[address] = 0xE0 | (val & 0x1F);
+        ram[IF] = 0xE0 | (val & 0x1F);
+    }
+    else if (address == STAT || address == NR_10) {
+        ram[address] = val | 0b10000000;
+    }
+    else if (address == NR_30) {
+        ram[NR_30] = val | 0b01111111;
+    }
+    else if (address == NR_32) {
+        ram[NR_32] = val | 0b10011111;
+    }
+    else if (address == NR_41) {
+        ram[NR_41] = val | 0b11000000;
+    }
+    else if (address == NR_44) {
+        ram[NR_44] = val | 0b00111111;
+    }
+    else if (address == NR_52) {
+        ram[NR_52] = val | 0b01110000;
     }
     else if (address == DMA) {
         copy_sprite_memory(val);

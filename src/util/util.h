@@ -28,6 +28,11 @@ using namespace std;
 #define get_bit(x, n) ((x & (1 << (n))) >> (n))
 
 /*
+ * Return true if x is between a and b.
+ */
+#define between(a, x, b) ((a <= x) && (x <= b))
+
+/*
  * @param file: An input stream for the file.
  * @return: The size of the file in bytes.
  */

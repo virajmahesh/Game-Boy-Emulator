@@ -226,3 +226,13 @@ def test_oam():
     screen_hash = run_test(rom_file, 500000)
 
     assert screen_hash == '7dce967813f'
+
+
+def test_unused_hwio():
+    """
+    Test that unused hardware registers are accessible and masked correctly.
+    """
+    rom_file = '{}/{}'.format(MEMORY_TEST_ROM_PATH, 'unused_hwio.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '7dce967813f'
