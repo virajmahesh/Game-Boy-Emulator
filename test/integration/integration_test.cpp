@@ -43,6 +43,9 @@ uint64_t execute_rom(const char * rom_file_name, uint32_t max_instructions) {
 }
 
 int main(int argc, char **argv) {
+    // Allocate extra space on the stack to fix some weird errors.
+    uint8_t stack[1024];
+
     char * rom_file_name = argv[1];
     uint32_t max_instructions = (uint32_t) atoi(argv[2]);
 

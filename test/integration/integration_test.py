@@ -13,6 +13,7 @@ TEST_ROM_PATH = '{}/{}'.format(PATH, 'test_roms')
 BOOT_TEST_ROM_PATH = '{}/{}'.format(TEST_ROM_PATH, 'boot')
 CPU_TEST_ROM_PATH = '{}/{}'.format(TEST_ROM_PATH, 'cpu')
 TIMING_TEST_ROM_PATH = '{}/{}'.format(TEST_ROM_PATH, 'timing')
+MEMORY_TEST_ROM_PATH = '{}/{}'.format(TEST_ROM_PATH, 'memory')
 
 INTEGRATION_BINARY_PATH = '../../build/bin/tests/IntegrationTest'
 
@@ -187,6 +188,16 @@ def test_blargg_cpu_test():
     assert screen_hash == '717209ded53'
 
 
+def test_cpu_reg_f():
+    """
+    Test that the last 4 bits of the F register are always 0.
+    """
+    rom_file = '{}/{}'.format(CPU_TEST_ROM_PATH, 'cpu_reg_f.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '6cf2c27b2c6'
+
+
 def test_boot_hwio():
     """
     Test that the Hardware Registers have correct boot values.
@@ -205,3 +216,13 @@ def test_boot_regs():
     screen_hash = run_test(rom_file, 1000000)
 
     assert screen_hash == '8b5d0c766cb'
+
+
+def test_oam():
+    """
+    Test that OAM has no unused bits.
+    """
+    rom_file = '{}/{}'.format(MEMORY_TEST_ROM_PATH, 'oam.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '7dce967813f'
