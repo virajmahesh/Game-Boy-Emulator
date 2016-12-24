@@ -65,7 +65,8 @@ def test_tima_increment_1():
 
 def test_tima_div_trigger_1():
     """
-    Test that writes to TMA are correctly handled.
+    Test that TIMA is correctly incremented for certain writes to DIV in
+    Timer Mode 1.
     """
     rom_file = '{}/{}'.format(TIMING_TEST_ROM_PATH, 'tima_div_trigger_1.gb')
     screen_hash = run_test(rom_file, 500000)
@@ -83,6 +84,17 @@ def test_tima_increment_2():
     assert screen_hash == '6af2d613bc4'
 
 
+def test_tima_div_trigger_2():
+    """
+    Test that TIMA is correctly incremented for certain writes to DIV in
+    Timer Mode 2.
+    """
+    rom_file = '{}/{}'.format(TIMING_TEST_ROM_PATH, 'tima_div_trigger_2.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '7601742e30c'
+
+
 def test_tima_increment_3():
     """
     Test that the TIMA register is correctly incremented in Timer Mode 3.
@@ -93,11 +105,33 @@ def test_tima_increment_3():
     assert screen_hash == '7ad768a3131'
 
 
+def test_tima_div_trigger_3():
+    """
+    Test that TIMA is correctly incremented for certain writes to DIV in
+    Timer Mode 3.
+    """
+    rom_file = '{}/{}'.format(TIMING_TEST_ROM_PATH, 'tima_div_trigger_3.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '63e83d1630f'
+
+
 def test_tima_increment_4():
     """
     Test that the TIMA register is correctly incremented in Timer Mode 4.
     """
     rom_file = '{}/{}'.format(TIMING_TEST_ROM_PATH, 'tima_increment_4.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '7ad768a3131'
+
+
+def test_tima_div_trigger_4():
+    """
+    Test that TIMA is correctly incremented for certain writes to DIV in
+    Timer Mode 4.
+    """
+    rom_file = '{}/{}'.format(TIMING_TEST_ROM_PATH, 'tima_div_trigger_4.gb')
     screen_hash = run_test(rom_file, 500000)
 
     assert screen_hash == '7ad768a3131'

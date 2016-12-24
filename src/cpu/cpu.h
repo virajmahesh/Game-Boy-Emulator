@@ -16,6 +16,9 @@
 #include "../util/util.h"
 
 #define TIMER_4096_MODE 4
+#define TIMER_262144_MODE 5
+#define TIMER_65536_MODE 6
+#define TIMER_16384_MODE 7
 
 /*
  * Provides methods for executing instructions, updating register values, and

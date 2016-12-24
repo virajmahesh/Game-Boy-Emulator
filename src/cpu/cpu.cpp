@@ -984,7 +984,15 @@ void CPU::handle_memory_flags() {
 
         if (get_bit(total_cycles, 9) && memory.load_byte(TAC) == TIMER_4096_MODE) {
             memory.get_byte_reference(TIMA) += 1;
-
+        }
+        else if (get_bit(total_cycles, 3) && memory.load_byte(TAC) == TIMER_262144_MODE) {
+            memory.get_byte_reference(TIMA) += 1;
+        }
+        else if (get_bit(total_cycles, 5) && memory.load_byte(TAC) == TIMER_65536_MODE) {
+            memory.get_byte_reference(TIMA) += 1;
+        }
+        else if (get_bit(total_cycles, 7) && memory.load_byte(TAC) == TIMER_16384_MODE) {
+            memory.get_byte_reference(TIMA) += 1;
         }
 
         div_cycles = 0;
