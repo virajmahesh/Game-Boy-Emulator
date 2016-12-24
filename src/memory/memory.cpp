@@ -84,6 +84,12 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
             ram[TIMA] = val; // Normal behavior.
         }
     }
+    else if (address == TAC) {
+        old_TAC_value = ram[TAC];
+
+        ram[TAC] = val;
+        flags.write_to_TAC = true;
+    }
     else if (address == TMA) {
         if (flags.reload_timer_b) {
             ram[TIMA] = val;
@@ -160,4 +166,8 @@ void Memory::set_new_timer_value() {
 
 uint8_t Memory::get_new_timer_value() {
     return new_timer_value;
+}
+
+uint8_t Memory::get_old_TAC_value() {
+    return old_TAC_value;
 }

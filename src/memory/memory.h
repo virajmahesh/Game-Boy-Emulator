@@ -53,6 +53,7 @@
 #define RESET_DIV_CYCLES_FLAG 0
 #define RELOAD_TIMER_A_FLAG 1
 #define RELOAD_TIMER_B_FLAG 2
+#define WRITE_TO_TAC_FLAG 3
 
 #define address_between(x, y) (x <= address and address <= y)
 
@@ -80,9 +81,11 @@ private:
         bool reset_div_cycles;
         bool reload_timer_a;
         bool reload_timer_b;
+        bool write_to_TAC;
     } flags;
 
     uint8_t new_timer_value;
+    uint8_t old_TAC_value;
 
 
 public:
@@ -164,6 +167,13 @@ public:
      * call this function immediately after a timer overflow.
      */
     void set_new_timer_value();
+
+    /*
+     * Returns the new value of the TAC register. The CPU should call this function
+     * if the WRITE_TO_TAC_FLAG is raised by the memory unit, to determine what the
+     * new value of the TAC register should be.
+     */
+    uint8_t get_old_TAC_value();
 };
 
 

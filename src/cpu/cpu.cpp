@@ -910,7 +910,7 @@ inline void CPU::update_timer(uint32_t cycles) {
     uint32_t timer_threshold = times[tac & 0b00000011];
 
     // If timer is not enabled, then don't update it.
-    if (!(tac >> 2)) {
+    if (!get_bit(tac, 2)) {
         return;
     }
 
@@ -979,19 +979,30 @@ long unsigned CPU::get_num_instructions() {
     return num_instructions;
 }
 
+uint8_t CPU::get_timer_mux(uint16_t timer_cycles, uint8_t tac) {
+    uint8_t tac_mode = tac & 0b00000011;
+    uint8_t tac_enable = get_bit(tac, 2);
+
+    if (tac_mode == TIMER_4096_MODE) {
+        return (get_bit(timer_cycles, 9)) && tac_enable;
+    }
+    else if (tac_mode == TIMER_262144_MODE) {
+        return (get_bit(timer_cycles, 3)) && tac_enable;
+    }
+    else if (tac_mode == TIMER_65536_MODE) {
+        return (get_bit(timer_cycles, 5)) && tac_enable;
+    }
+    else {
+        return (get_bit(timer_cycles, 7)) && tac_enable;
+    }
+}
+
 void CPU::handle_memory_flags() {
+    uint8_t tac = memory.load_byte(TAC);
+
     if (memory.get_flag(RESET_DIV_CYCLES_FLAG)) {
 
-        if (get_bit(total_cycles, 9) && memory.load_byte(TAC) == TIMER_4096_MODE) {
-            memory.get_byte_reference(TIMA) += 1;
-        }
-        else if (get_bit(total_cycles, 3) && memory.load_byte(TAC) == TIMER_262144_MODE) {
-            memory.get_byte_reference(TIMA) += 1;
-        }
-        else if (get_bit(total_cycles, 5) && memory.load_byte(TAC) == TIMER_65536_MODE) {
-            memory.get_byte_reference(TIMA) += 1;
-        }
-        else if (get_bit(total_cycles, 7) && memory.load_byte(TAC) == TIMER_16384_MODE) {
+        if (get_timer_mux(total_cycles, tac) && !get_timer_mux(0, tac)) {
             memory.get_byte_reference(TIMA) += 1;
         }
 
@@ -999,5 +1010,15 @@ void CPU::handle_memory_flags() {
         timer_cycles = 0;
         total_cycles = 0;
         memory.set_flag(RESET_DIV_CYCLES_FLAG, false);
+    }
+
+    if (memory.get_flag(WRITE_TO_TAC_FLAG)) {
+        uint8_t old_tac = memory.get_old_TAC_value();
+
+        if (get_timer_mux(total_cycles, old_tac) && !get_timer_mux(total_cycles, tac)) {
+            memory.get_byte_reference(TIMA) += 1;
+        }
+
+        memory.set_flag(WRITE_TO_TAC_FLAG, false);
     }
 }

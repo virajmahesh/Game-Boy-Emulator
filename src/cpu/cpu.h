@@ -15,10 +15,10 @@
 #include "../memory/memory.h"
 #include "../util/util.h"
 
-#define TIMER_4096_MODE 4
-#define TIMER_262144_MODE 5
-#define TIMER_65536_MODE 6
-#define TIMER_16384_MODE 7
+#define TIMER_4096_MODE 0
+#define TIMER_262144_MODE 1
+#define TIMER_65536_MODE 2
+#define TIMER_16384_MODE 3
 
 /*
  * Provides methods for executing instructions, updating register values, and
@@ -28,7 +28,9 @@
  *
  *  while (Emulator is running) {
  *      cpu.execute_next_instr();
+ *
  *      // Graphics and sound processing here.
+ *
  *      cpu.handler_interrupts();
  *  }
  *
@@ -42,12 +44,12 @@ private:
     bool ime_flag; // Master interrupt flag.
 
     uint64_t num_instructions; // The number of instructions executed.
-    uint64_t total_cycles; // The total number of cycles the CPU has been executing for.
+    uint16_t total_cycles; // The total number of cycles the CPU has been executing for.
 
-    int div_cycles; // Number of cycles since the DIV register was last updated.
-    int timer_cycles; // Number of cycles since the TIMA register was updated.
     int serial_cycles; // Number of cycles since the SB register was updated.
     int serial_bits; // The number of serial bits transferred.
+    int div_cycles; // Number of cycles since the DIV register was last updated.
+    int timer_cycles; // Number of cycles since the TIMA register was updated.
 
     Memory & memory; // The memory that the CPU reads from and writes to.
 
@@ -64,6 +66,7 @@ private:
 
     void update_timer(uint32_t);
     void update_serial(uint32_t);
+    uint8_t get_timer_mux(uint16_t, uint8_t);
 
 public:
     // CPU registers.

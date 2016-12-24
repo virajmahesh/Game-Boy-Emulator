@@ -167,6 +167,16 @@ def test_tma_write_reload():
     assert screen_hash == '6750a7f4a48'
 
 
+def test_rapid_toggle():
+    """
+    Test that writes to TMA are correctly handled.
+    """
+    rom_file = '{}/{}'.format(TIMING_TEST_ROM_PATH, 'rapid_toggle.gb')
+    screen_hash = run_test(rom_file, 500000)
+
+    assert screen_hash == '75c7db9abc4' # TODO: Fix this.
+
+
 def test_blargg_cpu_test():
     """
     Test that the emulator passes Blargg's cpu instruction test rom.
