@@ -35,7 +35,7 @@
  *  }
  *
  * The CPU also tracks the number of clock cycles that have elapsed, and
- * updates the appropriate timing registers as required.
+ * updates the appropriate timer registers as required.
  */
 class CPU {
 
@@ -161,6 +161,12 @@ public:
      * Handle the memory flags that were raised after executing an intstruction.
      */
     void handle_memory_flags();
+
+    /*
+     * Tick the cpu clock forward by the specified number of cycles.
+     * This updates the internal timer and the serial port.
+     */
+    void tick_cpu_clock(uint32_t cycles);
 };
 
 #endif

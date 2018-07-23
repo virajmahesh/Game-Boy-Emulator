@@ -1,0 +1,200 @@
+Start testing: Jul 22 16:10 PDT
+----------------------------------------------------------
+1/4 Testing: CartridgeTests
+1/4 Test: CartridgeTests
+Command: "/Users/viraj/Documents/Workspace/Game Boy Emulator/bin/tests/CartridgeTests"
+Directory: /Users/viraj/Documents/Workspace/Game Boy Emulator/test
+"CartridgeTests" start time: Jul 22 16:10 PDT
+Output:
+----------------------------------------------------------
+[==========] Running 10 tests from 10 test cases.
+[----------] Global test environment set-up.
+[----------] 1 test from MBC1_16_8_ROM_Test
+[ RUN      ] MBC1_16_8_ROM_Test.Load_Byte_From_ROM_Bank_0
+[       OK ] MBC1_16_8_ROM_Test.Load_Byte_From_ROM_Bank_0 (0 ms)
+[----------] 1 test from MBC1_16_8_ROM_Test (0 ms total)
+
+[----------] 1 test from MBC1_4_32_ROM_Test
+[ RUN      ] MBC1_4_32_ROM_Test.Load_Byte_From_ROM_Bank_0
+[       OK ] MBC1_4_32_ROM_Test.Load_Byte_From_ROM_Bank_0 (0 ms)
+[----------] 1 test from MBC1_4_32_ROM_Test (0 ms total)
+
+[----------] 1 test from MBC2_ROM_Test
+[ RUN      ] MBC2_ROM_Test.Load_Byte_From_ROM_Bank_0
+[       OK ] MBC2_ROM_Test.Load_Byte_From_ROM_Bank_0 (0 ms)
+[----------] 1 test from MBC2_ROM_Test (0 ms total)
+
+[----------] 1 test from MBC3_ROM_Test
+[ RUN      ] MBC3_ROM_Test.Load_Byte_From_ROM_Bank_0
+[       OK ] MBC3_ROM_Test.Load_Byte_From_ROM_Bank_0 (0 ms)
+[----------] 1 test from MBC3_ROM_Test (0 ms total)
+
+[----------] 1 test from MBC5_ROM_Test
+[ RUN      ] MBC5_ROM_Test.Load_Byte_From_ROM_Bank_0
+[       OK ] MBC5_ROM_Test.Load_Byte_From_ROM_Bank_0 (1 ms)
+[----------] 1 test from MBC5_ROM_Test (1 ms total)
+
+[----------] 1 test from MBC1_16_8_ROM_TEST
+[ RUN      ] MBC1_16_8_ROM_TEST.Bank_Switching
+[       OK ] MBC1_16_8_ROM_TEST.Bank_Switching (20 ms)
+[----------] 1 test from MBC1_16_8_ROM_TEST (20 ms total)
+
+[----------] 1 test from MBC1_4_32_ROM_TEST
+[ RUN      ] MBC1_4_32_ROM_TEST.Bank_Switching
+[       OK ] MBC1_4_32_ROM_TEST.Bank_Switching (6 ms)
+[----------] 1 test from MBC1_4_32_ROM_TEST (6 ms total)
+
+[----------] 1 test from MBC2_ROM_TEST
+[ RUN      ] MBC2_ROM_TEST.Bank_Switching
+[       OK ] MBC2_ROM_TEST.Bank_Switching (3 ms)
+[----------] 1 test from MBC2_ROM_TEST (3 ms total)
+
+[----------] 1 test from MBC3_ROM_TEST
+[ RUN      ] MBC3_ROM_TEST.Bank_Switching
+[       OK ] MBC3_ROM_TEST.Bank_Switching (20 ms)
+[----------] 1 test from MBC3_ROM_TEST (20 ms total)
+
+[----------] 1 test from MBC5_ROM_TEST
+[ RUN      ] MBC5_ROM_TEST.Bank_Switching
+[       OK ] MBC5_ROM_TEST.Bank_Switching (77 ms)
+[----------] 1 test from MBC5_ROM_TEST (77 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 10 test cases ran. (127 ms total)
+[  PASSED  ] 10 tests.
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"CartridgeTests" end time: Jul 22 16:10 PDT
+"CartridgeTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/4 Testing: MemoryTests
+2/4 Test: MemoryTests
+Command: "/Users/viraj/Documents/Workspace/Game Boy Emulator/bin/tests/MemoryTests"
+Directory: /Users/viraj/Documents/Workspace/Game Boy Emulator/test
+"MemoryTests" start time: Jul 22 16:10 PDT
+Output:
+----------------------------------------------------------
+[==========] Running 6 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 6 tests from Memory_Test
+[ RUN      ] Memory_Test.Load_And_Store_Byte_RAM
+[       OK ] Memory_Test.Load_And_Store_Byte_RAM (0 ms)
+[ RUN      ] Memory_Test.Load_And_Store_Word_RAM
+[       OK ] Memory_Test.Load_And_Store_Word_RAM (0 ms)
+[ RUN      ] Memory_Test.Address_Space_Partitioning_Load_Ops
+[       OK ] Memory_Test.Address_Space_Partitioning_Load_Ops (1 ms)
+[ RUN      ] Memory_Test.Address_Space_Partitioning_Store_Ops
+[       OK ] Memory_Test.Address_Space_Partitioning_Store_Ops (0 ms)
+[ RUN      ] Memory_Test.Memory_Flags_Access
+[       OK ] Memory_Test.Memory_Flags_Access (0 ms)
+[ RUN      ] Memory_Test.Memory_Flags_Write_to_DIV
+[       OK ] Memory_Test.Memory_Flags_Write_to_DIV (0 ms)
+[----------] 6 tests from Memory_Test (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test case ran. (1 ms total)
+[  PASSED  ] 6 tests.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"MemoryTests" end time: Jul 22 16:10 PDT
+"MemoryTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/4 Testing: CPUTests
+3/4 Test: CPUTests
+Command: "/Users/viraj/Documents/Workspace/Game Boy Emulator/bin/tests/CPUTests"
+Directory: /Users/viraj/Documents/Workspace/Game Boy Emulator/test
+"CPUTests" start time: Jul 22 16:10 PDT
+Output:
+----------------------------------------------------------
+[==========] Running 21 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 21 tests from CPU_Test
+[ RUN      ] CPU_Test.Test_Flags
+[       OK ] CPU_Test.Test_Flags (0 ms)
+[ RUN      ] CPU_Test.Test_NOP
+[       OK ] CPU_Test.Test_NOP (1 ms)
+[ RUN      ] CPU_Test.Test_LD_nn_addr_SP
+[       OK ] CPU_Test.Test_LD_nn_addr_SP (0 ms)
+[ RUN      ] CPU_Test.Test_JR_d
+[       OK ] CPU_Test.Test_JR_d (0 ms)
+[ RUN      ] CPU_Test.Test_JR_cc_d
+[       OK ] CPU_Test.Test_JR_cc_d (0 ms)
+[ RUN      ] CPU_Test.Test_LD_rp_nn
+[       OK ] CPU_Test.Test_LD_rp_nn (1 ms)
+[ RUN      ] CPU_Test.ADD_HL_rp
+[       OK ] CPU_Test.ADD_HL_rp (0 ms)
+[ RUN      ] CPU_Test.LD_nn_addr_A
+[       OK ] CPU_Test.LD_nn_addr_A (0 ms)
+[ RUN      ] CPU_Test.JP_nn
+[       OK ] CPU_Test.JP_nn (0 ms)
+[ RUN      ] CPU_Test.LD_r_n
+[       OK ] CPU_Test.LD_r_n (0 ms)
+[ RUN      ] CPU_Test.LDH_n_A
+[       OK ] CPU_Test.LDH_n_A (1 ms)
+[ RUN      ] CPU_Test.CALL_cc_nn
+[       OK ] CPU_Test.CALL_cc_nn (0 ms)
+[ RUN      ] CPU_Test.CALL_nn
+[       OK ] CPU_Test.CALL_nn (0 ms)
+[ RUN      ] CPU_Test.PUSH_rp2
+[       OK ] CPU_Test.PUSH_rp2 (0 ms)
+[ RUN      ] CPU_Test.POP_rp2
+[       OK ] CPU_Test.POP_rp2 (0 ms)
+[ RUN      ] CPU_Test.RET
+[       OK ] CPU_Test.RET (1 ms)
+[ RUN      ] CPU_Test.LDH_A_n
+[       OK ] CPU_Test.LDH_A_n (0 ms)
+[ RUN      ] CPU_Test.RLC_r
+[       OK ] CPU_Test.RLC_r (0 ms)
+[ RUN      ] CPU_Test.RRC_r
+[       OK ] CPU_Test.RRC_r (0 ms)
+[ RUN      ] CPU_Test.RL_r
+[       OK ] CPU_Test.RL_r (1 ms)
+[ RUN      ] CPU_Test.RR_r
+[       OK ] CPU_Test.RR_r (0 ms)
+[----------] 21 tests from CPU_Test (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 21 tests from 1 test case ran. (5 ms total)
+[  PASSED  ] 21 tests.
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"CPUTests" end time: Jul 22 16:10 PDT
+"CPUTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/4 Testing: IntegrationTests
+4/4 Test: IntegrationTests
+Command: "/Users/viraj/Documents/Workspace/Game Boy Emulator/bin/tests/IntegrationTests"
+Directory: /Users/viraj/Documents/Workspace/Game Boy Emulator/test
+"IntegrationTests" start time: Jul 22 16:10 PDT
+Output:
+----------------------------------------------------------
+[==========] Running 2 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 2 tests from Timing_Test
+[ RUN      ] Timing_Test.Blargg_Timing_Test
+[       OK ] Timing_Test.Blargg_Timing_Test (920 ms)
+[ RUN      ] Timing_Test.DIV_Write
+[       OK ] Timing_Test.DIV_Write (815 ms)
+[----------] 2 tests from Timing_Test (1735 ms total)
+
+[----------] Global test environment tear-down
+[==========] 2 tests from 1 test case ran. (1735 ms total)
+[  PASSED  ] 2 tests.
+<end of output>
+Test time =   1.76 sec
+----------------------------------------------------------
+Test Passed.
+"IntegrationTests" end time: Jul 22 16:10 PDT
+"IntegrationTests" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Jul 22 16:10 PDT

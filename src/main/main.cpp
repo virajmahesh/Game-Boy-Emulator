@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     // The number of cycles executed by the CPU.
     uint32_t cycles = 0;
 
-    // Emulator continues to run forever.
+    // Emulator continues to run until the window is closed
     while (gpu.window_open()) {
         cycles = cpu.execute_next_instr();
         cpu.handle_interrupts();
@@ -28,6 +28,9 @@ int main(int argc, char **argv) {
 
         keyboard.process_key_events();
     }
+
+    cout << cpu.get_num_instructions() << endl;
+    cout << hex << gpu.screen_hash() << endl;
 
     glfwTerminate();
     return 0;

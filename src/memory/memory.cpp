@@ -3,6 +3,7 @@
  *
  */
 
+#include <string.h>
 #include "memory.h"
 #include "../util/util.h"
 
@@ -11,7 +12,7 @@ Memory::Memory(Cartridge& cart) : cartridge(cart) {
 }
 
 inline void Memory::initialize_registers() {
-    memset(ram + 0xFF00, 0xFF, 0xFF);
+    memset(ram, 0xFF, 0xFFFF);
     memset(&flags, false, sizeof(flags));
 
     ram[SB] = 0x00;
@@ -37,7 +38,7 @@ inline void Memory::initialize_registers() {
     ram[NR_44] = 0xBF;
     ram[NR_50] = 0x77;
     ram[NR_51] = 0xF3;
-    ram[NR_52] = 0xF0;
+    ram[NR_52] = 0xF1;
     ram[LCDC] = 0x91;
     ram[STAT] = 0x83;
     ram[SCY] = 0x00;
@@ -50,6 +51,10 @@ inline void Memory::initialize_registers() {
     ram[WY] = 0x00;
     ram[WX] = 0x00;
     ram[IE] = 0x00;
+
+    // Initialize registers on boot
+    ram[P1] = 0xCF;
+    ram[DIV] = 0x18;
 }
 
 uint8_t Memory::load_byte(uint16_t address) {
@@ -78,9 +83,9 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
     else if (address == 0xFF08  || address == 0xFF09 ||
              between(0xFF0A, address, 0xFF0E) || address == 0xFF15 ||
              between(0xFF27, address, 0xFF29) || address == 0xFF1F ||
-             between(0xFF4C, address, 0xFF4F) || address == 0xFF03 ||
-             between(0xFF50, address, 0xFFFE)) {
+             between(0xFF4C, address, 0xFF7F) || address == 0xFF03) {
         // Ignore Writes.
+        cout << hex << address << " " << hex << (uint16_t)ram[address] << endl;
     }
     else if (address == DIV) {
         ram[DIV] = 0;
@@ -132,7 +137,8 @@ void Memory::store_byte(uint16_t address, uint8_t val) {
         ram[NR_52] = val | 0b01110000;
     }
     else if (address == DMA) {
-        copy_sprite_memory(val);
+        DMA_address = val;
+        flags.oam_dma = true;
     }
     else {
         ram[address] = val;
@@ -176,7 +182,7 @@ void Memory::copy(void *dest, uint16_t addr, int size) {
     memcpy(dest, ram + addr, size);
 }
 
-inline void Memory::copy_sprite_memory(uint8_t value) {
+void Memory::copy_sprite_memory(uint8_t value) {
     uint16_t cart_addr = value << 8;
     for (int i = 0; i < 0x9F; i++) {
         ram[0xFE00 + i] = load_byte(cart_addr + i);
@@ -201,4 +207,8 @@ uint8_t Memory::get_new_timer_value() {
 
 uint8_t Memory::get_old_TAC_value() {
     return old_TAC_value;
+}
+
+uint8_t Memory::get_DMA_Address() {
+    return DMA_address;
 }

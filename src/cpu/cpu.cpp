@@ -329,8 +329,8 @@ inline uint32_t CPU::fetch_execute_instruction() {
     uint8_t z = (instr & 0x07); // Bits (0-2) of the instruction.
     uint8_t p = y >> 1; // Bits (4-5) of the instruction.
     uint8_t q = y % 2; // Bit 3 of the instruction.
-
     uint32_t cycles = 0;
+    //TODO: increment the timer here by 4 cycles
 
     if (instr == 0xCB) {
         // CB Prefixed instructions
@@ -624,8 +624,12 @@ inline uint32_t CPU::fetch_execute_instruction() {
             else if (instr == 0xF0) {
                 // LD A, (0xFF00 + n) ~ LDH A, n
                 uint8_t n = memory.load_byte(PC + 1);
+                //tick_cpu_clock(4);
+
                 A = memory.load_byte(0xFF00 + n);
                 PC += 2;
+                //tick_cpu_clock(4);
+
                 cycles += 12;
             }
             else {
@@ -997,6 +1001,11 @@ uint8_t CPU::get_timer_mux(uint16_t timer_cycles, uint8_t tac) {
     }
 }
 
+void CPU::tick_cpu_clock(uint32_t cycles) {
+    update_timer(cycles);
+    update_serial(cycles);
+}
+
 void CPU::handle_memory_flags() {
     uint8_t tac = memory.load_byte(TAC);
 
@@ -1020,5 +1029,16 @@ void CPU::handle_memory_flags() {
         }
 
         memory.set_flag(WRITE_TO_TAC_FLAG, false);
+    }
+
+    if (memory.get_flag(OAM_DMA_FLAG)) {
+        timer_cycles += 671;
+        total_cycles += 671;
+        div_cycles += 671;
+
+        uint8_t DMA_address = memory.get_DMA_Address();
+
+        memory.copy_sprite_memory(DMA_address);
+        memory.set_flag(OAM_DMA_FLAG, false);
     }
 }

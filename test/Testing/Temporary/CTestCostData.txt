@@ -1,0 +1,5 @@
+CartridgeTests 6 0.0256593
+MemoryTests 6 0.00487646
+CPUTests 6 0.00695559
+IntegrationTests 2 0.880786
+---

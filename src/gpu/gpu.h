@@ -19,6 +19,7 @@
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
+#define NUM_PIXELS SCREEN_WIDTH * SCREEN_HEIGHT
 
 #define BGR_WIDTH 256
 #define BGR_HEIGHT 256
@@ -56,6 +57,8 @@ struct Pixel {
     bool operator==(const Pixel & p);
 
     bool operator != (const Pixel & p);
+
+    void reset_to_white();
 };
 
 /*
@@ -122,6 +125,11 @@ public:
      * @param mem: The memory from which the GPU will read from and write to.
      */
     GPU(Memory &);
+
+    /*
+     * Reset all the pixels in the window to be white
+     */
+    void clear_window();
 
     /*
      * @return: A pointer to the GLFW window that the Game Boy screen is being

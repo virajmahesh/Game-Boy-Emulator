@@ -29,6 +29,13 @@ bool Pixel::operator!=(const Pixel & p) {
     return b != p.b or g != p.g or r != p.r;
 }
 
+void Pixel::reset_to_white() {
+    b = 255;
+    g = 255;
+    r = 255;
+    a = 0;
+}
+
 GPU::GPU(Memory & mem) : memory(mem) {
     cycles = 0;
     mode = OAM_ACCESS;
@@ -42,7 +49,13 @@ GPU::GPU(Memory & mem) : memory(mem) {
     glfwSetWindowSizeCallback(window, window_resized);
 
     // Create a new buffer of pixels.
-    buffer = new Pixel[SCREEN_WIDTH * SCREEN_HEIGHT];
+    buffer = new Pixel[NUM_PIXELS];
+}
+
+void GPU::clear_window() {
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        buffer[i].reset_to_white();
+    }
 }
 
 void GPU::window_resized(GLFWwindow *window, int width, int height) {
@@ -62,6 +75,8 @@ void GPU::render_screen(uint32_t cpu_cycles) {
     uint8_t lyc = memory.load_byte(LYC);
     uint8_t stat = memory.load_byte(STAT);
     uint8_t interrupt_flag = memory.load_byte(IF);
+
+    //draw_screen();
 
     switch (mode) {
         case OAM_ACCESS:
@@ -94,6 +109,7 @@ void GPU::render_screen(uint32_t cpu_cycles) {
                     reset_bit(stat, 1);
                     set_bit(interrupt_flag, 0);
 
+                    clear_window();
                     draw_screen();
                 }
                 else {
@@ -359,7 +375,7 @@ uint64_t GPU::screen_hash() {
     uint32_t *screen = (uint32_t *)buffer;
     uint64_t hash = 0;
 
-    for (int i = 0; i < SCREEN_WIDTH*SCREEN_HEIGHT; i++) {
+    for (int i = 0; i < NUM_PIXELS; i++) {
         hash = (hash + (324723947 + screen[i])) ^ 93485734985;
     }
 

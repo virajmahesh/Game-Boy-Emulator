@@ -54,6 +54,7 @@
 #define RELOAD_TIMER_A_FLAG 1
 #define RELOAD_TIMER_B_FLAG 2
 #define WRITE_TO_TAC_FLAG 3
+#define OAM_DMA_FLAG 4
 
 #define address_between(x, y) (x <= address and address <= y)
 
@@ -82,10 +83,12 @@ private:
         bool reload_timer_a;
         bool reload_timer_b;
         bool write_to_TAC;
+        bool oam_dma;
     } flags;
 
     uint8_t new_timer_value;
     uint8_t old_TAC_value;
+    uint8_t DMA_address;
 
 
 public:
@@ -94,7 +97,6 @@ public:
     Cartridge & cartridge;
 
     void initialize_registers();
-    void copy_sprite_memory(uint8_t value);
 
     Memory(Cartridge& cart);
 
@@ -145,6 +147,10 @@ public:
      */
     virtual void copy(void* destination, uint16_t address, int size);
 
+    /*
+     * Copies sprite memory from the cartridge to the GPU.
+     */
+    virtual void copy_sprite_memory(uint8_t value);
 
     /*
      * Read and return the value of a memory flag.
@@ -174,6 +180,11 @@ public:
      * new value of the TAC register should be.
      */
     uint8_t get_old_TAC_value();
+
+    /*
+     * @return: The address to start the DMA transfer from.
+     */
+    uint8_t get_DMA_Address();
 };
 
 
